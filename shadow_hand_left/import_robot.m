@@ -6,25 +6,12 @@
 % Converted obj files in meshes folder -> stl files using https://www.makexyz.com/convert/obj-to-stl
 %[shadow_hand_left, shadow_hand_left_info] = importrobot("shadow_hand_left.urdf");
 smimport("shadow_hand_left.urdf", "ModelName","shadow_hand_left");
+smimport("shadow_hand_right.urdf", "ModelName","shadow_hand_right");
 %%
 [shadow_hand_left_rbt, shadow_hand_left_info] = importrobot("shadow_hand_left.slx");
+[shadow_hand_right_rbt, shadow_hand_right_info] = importrobot("shadow_hand_right.slx");
 %%
 addpath("meshes");
-
-%%
-Ts = 0.001;
-T = 2;
-signal1 = Simulink.SimulationData.Signal;
-signal1.Name = 'signal1';
-signal1.BlockPath = Simulink.SimulationData.BlockPath('Out1');
-signal1.PortType = 'inport';
-signal1.PortIndex = 1;
-signal1.Values = timeseries(zeros(1, length(0:Ts:T)), 0:Ts:T);
-ds1 = Simulink.SimulationData.Dataset(timeseries(zeros(1, length(0:Ts:T)), 0:Ts:T));
-
-save('signals.mat', 'ds1');
-%%
-s = convertToSLDataset("signals.mat","signals2.mat");
 
 %% Create dataset for Signal Editor block containing desired joint trajectories
 
