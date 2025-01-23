@@ -1,36 +1,30 @@
-% Downloaded the following folders
+%% Import urdf files into Simulink
+% Urdf files downloaded from here:
 % https://github.com/dexsuite/dex-urdf/blob/main/robots/hands/shadow_hand
+% Urdf files slightly modified to use stl files instead of obj files
 
-% using https://download-directory.github.io/
-
-% Converted obj files in meshes folder -> stl files using https://www.makexyz.com/convert/obj-to-stl
-%[shadow_hand_left, shadow_hand_left_info] = importrobot("shadow_hand_left.urdf");
 smimport("shadow_hand_left.urdf", "ModelName","shadow_hand_left");
 smimport("shadow_hand_right.urdf", "ModelName","shadow_hand_right");
-%%
-[shadow_hand_left_rbt, shadow_hand_left_info] = importrobot("shadow_hand_left.slx");
-[shadow_hand_right_rbt, shadow_hand_right_info] = importrobot("shadow_hand_right.slx");
-%%
+
+%% Get rigidBodyTree objects required for some Simscape Multibody blocks
+% shadow_hand_left_rbt = importrobot("shadow_hand_left.slx");
+% shadow_hand_right_rbt = importrobot("shadow_hand_right.slx");
+
+% Import directly from urdf, not simulink file, because this method
+% auto assigns the bodies their associated names which is convenient for
+% selecting certain bodies to serve as end-effectors
+shadow_hand_left_rbt = importrobot("shadow_hand_left.urdf");
+shadow_hand_right_rbt = importrobot("shadow_hand_right.urdf");
+
+%% Make sure to run this section before simulating
+% Meshes folder required for visuals
 addpath("meshes");
 
-%% Create dataset for Signal Editor block containing desired joint trajectories
+%% Joint names
+% Names of joints corresponding to bounds extracted via constraintJointBounds
+% I figured out the matching by comparing the default bounds to those in the urdf file
+% This ordering now aligns to the ordering of input/output ports of robot subsystems in Simulink files 
+jointNames = {'WRJ2', 'WRJ1', 'FFJ4', 'FFJ3', 'FFJ2', 'FFJ1', 'LFJ5', 'LFJ4', 'LFJ3', 'LFJ2', 'LFJ1', ...
+    'MFJ4', 'MFJ3', 'MFJ2', 'MFJ1', 'RFJ4', 'RFJ3', 'RFJ2', 'RFJ1', 'THJ5', 'THJ4', 'THJ3', 'THJ2', 'THJ1'};
 
-% Get joint names (names of input ports to Robot block)
-h=getSimulinkBlockHandle('test_asl_poses/Robot');
-handles = find_system(h, 'LookUnderMasks', 'on', 'FollowLinks', 'on', 'SearchDepth', 1, 'BlockType', 'Inport');
-portInfo = [get_param(handles, 'Name'), get_param(handles, 'Port')];
-
-% Create dataset and save
-Ts = 0.001;
-T = 2;
-ds = Simulink.SimulationData.Dataset;
-for i=1:24
-    trajectory = timeseries(zeros(1, length(0:Ts:T)), 0:Ts:T);
-    ds = addElement(ds, trajectory, portInfo{i,1});
-end
-save('signals.mat', 'ds');
-
-%%
-% WRJ2 and WRJ1: determine "uprightness" of hand, should probably be set to 0 most
-% of time
-% THJ5: joint at "base" of thumb, determines thumb orientation
+nJoints = 24;

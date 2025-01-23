@@ -1,35 +1,3 @@
-%% Import urdf files into Simulink
-% Urdf files downloaded from here:
-% https://github.com/dexsuite/dex-urdf/blob/main/robots/hands/shadow_hand
-% Urdf files slightly modified to use stl files instead of obj files
-
-smimport("shadow_hand_left.urdf", "ModelName","shadow_hand_left");
-smimport("shadow_hand_right.urdf", "ModelName","shadow_hand_right");
-
-%% Get rigidBodyTree objects required for some Simscape Multibody blocks
-[shadow_hand_left_rbt, shadow_hand_left_info] = importrobot("shadow_hand_left.slx");
-[shadow_hand_right_rbt, shadow_hand_right_info] = importrobot("shadow_hand_right.slx");
-
-%%
-shadow_hand_left_rbt = importrobot("shadow_hand_left.urdf");
-shadow_hand_right_rbt = importrobot("shadow_hand_right.urdf");
-
-%% Make sure to run this section before simulating
-% Meshes folder required for visuals
-addpath("meshes");
-
-%% Get joint values manually set in test_asl_poses_quick_edit.slx files
-% Get joint values from left_test_asl_poses_quick_edit.slx
-%out = sim('left_test_asl_poses_quick_edit.slx');
-out = sim('right_test_asl_poses_quick_edit.slx');
-jointValues = out.jointValues{1}.Values.Data(1,:);
-
-% Save joint values to mat files -- make sure to change mat file name
-% depending on which ASL sign you've recreated!
-%save('number_1.mat', "jointValues");
-save('fist.mat', "jointValues");
-
-
 %% Create dataset for Signal Editor block containing desired joint trajectories
 
 % Get joint names (names of input ports to Robot block)
@@ -125,12 +93,8 @@ hold on;
 [~,patchObj] = show(box);
 patchObj.FaceColor = [0 1 1];
 patchObj.EdgeColor = 'none';
-%%
-% Names of joints corresponding to bounds extracted via constraintJointBounds
-% I figured out the matching by comparing the default bounds to those in the urdf file
-jointNames = {'WRJ2', 'WRJ1', 'FFJ4', 'FFJ3', 'FFJ2', 'FFJ1', 'LFJ5', 'LFJ4', 'LFJ3', 'LFJ2', 'LFJ1', ...
-    'MFJ4', 'MFJ3', 'MFJ2', 'MFJ1', 'RFJ4', 'RFJ3', 'RFJ2', 'RFJ1', 'THJ5', 'THJ4', 'THJ3', 'THJ2', 'THJ1'};
 
+%%
 % Create solver
 gik = generalizedInverseKinematics('RigidBodyTree', shadow_hand_left_rbt, ...
     'ConstraintInputs', {'pose','joint'});
@@ -181,97 +145,3 @@ q0=homeConfiguration(shadow_hand_left_rbt);
 qConst = gik(q0, lftip_pos, jointLimits);
 figure;
 show(shadow_hand_left_rbt,qConst)
-
-%%
-% Names of joints corresponding to bounds extracted via constraintJointBounds
-% I figured out the matching by comparing the default bounds to those in the urdf file
-jointNames = {'WRJ2', 'WRJ1', 'FFJ4', 'FFJ3', 'FFJ2', 'FFJ1', 'LFJ5', 'LFJ4', 'LFJ3', 'LFJ2', 'LFJ1', ...
-    'MFJ4', 'MFJ3', 'MFJ2', 'MFJ1', 'RFJ4', 'RFJ3', 'RFJ2', 'RFJ1', 'THJ5', 'THJ4', 'THJ3', 'THJ2', 'THJ1'};
-
-targetConfig = [];
-for i = 1:24
-    targetConfig = [targetConfig, struct('JointName', jointNames{i}, 'JointPosition', jointValues(i))];
-end
-%%
-
-% Create solver
-gik = generalizedInverseKinematics('RigidBodyTree', shadow_hand_right_rbt, ...
-    'ConstraintInputs', {'pose','joint'});
-
-% gik = generalizedInverseKinematics('RigidBodyTree', shadow_hand_right_rbt, ...
-%     'ConstraintInputs', {'pose','joint'}, 'SolverAlgorithm','LevenbergMarquardt');
-
-% gik = generalizedInverseKinematics('RigidBodyTree', shadow_hand_left_rbt, ...
-%     'ConstraintInputs', {'cartesian','position','aiming','orientation','joint'});
-
-% Solver parameters
-% gik.SolverParameters.MaxIterations = 1500;
-% gik.SolverParameters.MaxTime = 2;
-
-% Joint constraints -- only want little finger lf to move
-jointLimits = constraintJointBounds(shadow_hand_right_rbt);
-% oldBounds = jointLimits.Bounds;
-upperBounds = oldBounds(:,2);
-lowerBounds = oldBounds(:,1);
-upperBounds([1:6, 12:24]) = 1e-3;
-lowerBounds([1:6, 12:24]) = -1 * 1e-3;
-jointLimits.Bounds = [upperBounds, lowerBounds];
-
-% oldBounds = jointLimits.Bounds;
-% upperBounds = oldBounds(:,2);
-% lowerBounds = oldBounds(:,1);
-% upperBounds(1:24) = 0;
-% lowerBounds(1:24) = 0;
-% jointLimits.Bounds = [upperBounds, lowerBounds];
-
-% oldBounds = jointLimits.Bounds;
-% upperBounds = oldBounds(:,2);
-% lowerBounds = oldBounds(:,1);
-% upperBounds(1:2) = 0;
-% lowerBounds(1:2) = 0;
-% jointLimits.Bounds = [upperBounds, lowerBounds];
-
-
-% oldBounds = jointLimits.Bounds;
-% upperBounds = oldBounds(:,2);
-% lowerBounds = oldBounds(:,1);
-% upperBounds([1:6, 12:24]) = 0;
-% lowerBounds([1:6, 12:24]) = 0;
-% jointLimits.Bounds = [upperBounds, lowerBounds];
-
-% End effector pose contraints
-% targetPose = se3(getTransform(shadow_hand_right_rbt,targetConfig,"lftip","world"));
-targetPose = se3(getTransform(shadow_hand_right_rbt,homeConfiguration(shadow_hand_right_rbt),"lftip","world"));
-
-%lftip_pos = constraintCartesianBounds('lftip', 'ReferenceBody', 'world');
-lftip_pos = constraintPoseTarget('lftip', 'ReferenceBody', 'world');
-lftip_pos.TargetTransform = tform(target_pose);
-lftip_pos.OrientationTolerance = deg2rad(10);
-lftip_pos.PositionTolerance = 0;
-lftip_pos.Weights = [1, 1]; % PositionTolerance and OrientationTolerance
-%lftip_pos.Bounds = [0.01, 0.03; 0.03, 0.034; 0.25, 0.35];
-
-% Initial config
-q0=homeConfiguration(shadow_hand_right_rbt);
-
-%[qWaypoints(2,:),solutionInfo] = gik(q0, lftip_pos, jointLimits);
-[qWaypoints,solutionInfo] = gik(q0, lftip_pos, jointLimits);
-
-qSol = gik(q0, lftip_pos, jointLimits);
-figure;
-show(shadow_hand_left_rbt,qSol)
-solJointValues = vertcat(qSol.JointPosition);
-%%
-% Create dataset and save
-Ts = 0.001;
-T = 2;
-time_samples = 0:Ts:T;
-ds = Simulink.SimulationData.Dataset;
-for i=1:24
-    %trajectory = timeseries(zeros(1, length(0:Ts:T)), 0:Ts:T);
-    trajectory = timeseries(solJointValues(i) * ones(1, length(time_samples)), time_samples);
-    ds = addElement(ds, trajectory, jointNames{i});
-end
-save('signals.mat', 'ds');
-%%
-viztree = interactiveRigidBodyTree(shadow_hand_right_rbt);
