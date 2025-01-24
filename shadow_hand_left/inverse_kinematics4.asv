@@ -11,12 +11,15 @@ rbt = shadow_hand_right_rbt;
 q0 = homeConfiguration(rbt);
 valuesPrev = zeros(1,24);
 
-curledInFingers = {'LF', 'RF', 'MF'};
-thumbRestingFinger = {'LF'}; % which finger thumb rests upon, e.g., MF in number 1 and RF in number 2
-thumbTouchesFinger = {}; % which finger thumb touches, e.g., RF in number 7
+numberIdx = 1;
+
+curledInFingers = number_pose_params(numberIdx).curledInFingers;
+thumbRestingFinger = number_pose_params(numberIdx).thumbRestingFinger;
+thumbTouchesFinger = number_pose_params(numberIdx).thumbTouchesFinger;
 
 for fingerIdx = 1:5
 %% Set parameters
+% Params for curledInFingers
 % Proportion of y-distance from palm ref frame to lftip ref frame to
 % have y value of lftip
 yprop = 0.8;
@@ -25,18 +28,28 @@ yprop = 0.8;
 % have z value of lftip
 zprop = 0.5;
 
+% Params for thumbTouchesFinger
+yoffset_from_palm = [0.01, -0.01, 0.01, 0.01];
+zoffset_from_knuckle = [0, 0, 0, 0];
+zrot = deg2rad([30, 30, 0, 10]);
+yrot = deg2rad([0, 30, 0, 0]);
+
 %% Set up target pose of tip
 tip_frame = [lower(fingerNames{fingerIdx}),'tip'];
 tip_to_world = se3(getTransform(rbt,q0,tip_frame,"world"));
 if fingerIdx == 5 % Thumb
-    if ~isempty(thumbRestingFinger)
+    if ~isempty(thumbRestingFinger) % If thumb rests o
         restingIdx = contains(fingerNames,thumbRestingFinger{1});
         resting_frame = [lower(fingerNames{restingIdx}),'middle']; %thumb rests upon middle link of this finger
         distanceFromRestingFinger = constraintPositionTarget(tip_frame);
         distanceFromRestingFinger.ReferenceBody = resting_frame;
-        distanceFromRestingFinger.PositionTolerance = 1e-3;
+        distanceFromRestingFinger.PositionTolerance = 1e-2;
 
     elseif ~isempty(thumbTouchesFinger)
+        touching_frame = [lower(thumbTouchesFinger{1}),'tip']; %thumb touches tip of this finger
+        distanceFromTouchingFinger = constraintPositionTarget(tip_frame);
+        distanceFromTouchingFinger.ReferenceBody = touching_frame;
+        distanceFromTouchingFinger.PositionTolerance = 1e-3;
     end
 else % Other four fingers
     if any(contains(curledInFingers, fingerNames{fingerIdx}))
@@ -64,9 +77,45 @@ else % Other four fingers
         
         % Create target pose
         targetPose = T1 * R1 * R2;
+    elseif any(contains(thumbTouchesFinger, fingerNames{fingerIdx}))
+        knuckle_frame = [lower(fingerNames{fingerIdx}),'knuckle'];
+        
+        % Get transforms of certain frames relative to world in home config
+        knuckle_to_world = se3(getTransform(rbt,q0,knuckle_frame,"world"));
+        palm_to_world = se3(getTransform(rbt,q0,"palm","world"));
+        
+        % Create target translation
+        trvec_palm = trvec(palm_to_world); 
+        trvec_tip = trvec(tip_to_world); 
+        trvec_knuckle = trvec(knuckle_to_world); 
+        trvec_new = trvec_palm;
+        trvec_new(1) = trvec_palm(1) + 0.08;
+        %trvec_new(2) = trvec_palm(2) + yprop_touch(fingerIdx)*(trvec_tip(2) - trvec_palm(2)); 
+        trvec_new(2) = trvec_palm(2)+ yoffset_from_palm(fingerIdx);
+        trvec_new(3) = trvec_knuckle(3) + zoffset_from_knuckle(fingerIdx);
+        T1 = se3(trvec_new, "trvec");
+        
+        % Get target rotation
+        % Get home config orientation of tip relative to world
+        R1 = se3(rotm(tip_to_world)); 
+        % By inspection, we see that we need to rotate around by x axis by 180 deg to get z axis of tip pointing in -z direction of world frame
+        % Make a little less than 180 so that it's more realistic
+        R2 = se3([deg2rad(90), yrot(fingerIdx), zrot(fingerIdx)],"eul","XYZ"); 
+        
+        % Create target pose
+        targetPose = T1 * R1 * R2;
     else
         targetPose = tip_to_world;
     end
+
+    % End effector pose contraints
+    %lftip_pos = constraintCartesianBounds('lftip', 'ReferenceBody', 'world');
+    tip_pos = constraintPoseTarget(tip_frame, 'ReferenceBody', 'world');
+    tip_pos.TargetTransform = tform(targetPose);
+    tip_pos.OrientationTolerance = deg2rad(30); % allow more leeway for orientation
+    tip_pos.PositionTolerance = 0;
+    tip_pos.Weights = [20, 1]; % PositionTolerance and OrientationTolerance
+    %lftip_pos.Bounds = [0.01, 0.03; 0.03, 0.034; 0.25, 0.35];
 
 end
 
@@ -102,10 +151,14 @@ jointLimits.Bounds = [lowerBounds, upperBounds];
 jointLimits.Weights = 20 * ones(1, 24);
 
 %% Run solver
-if fingerIdx == 5
+if fingerIdx < 5
     [qSol, solutionInfo] = gik(q0, tip_pos, jointLimits);
 else
-    [qSol, solutionInfo] = gik(q0, distanceFromRestingFinger, jointLimits);
+    if ~isempty(thumbRestingFinger)
+        [qSol, solutionInfo] = gik(q0, distanceFromRestingFinger, jointLimits);
+    elseif ~isempty(thumbTouchesFinger)
+        [qSol, solutionInfo] = gik(q0, distanceFromTouchingFinger, jointLimits);
+    end
 end
 solJointValues = vertcat(qSol.JointPosition);
 solJointValues(abs(solJointValues) < 1e-3)=0;
