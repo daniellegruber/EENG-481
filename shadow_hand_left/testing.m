@@ -145,3 +145,8 @@ q0=homeConfiguration(shadow_hand_left_rbt);
 qConst = gik(q0, lftip_pos, jointLimits);
 figure;
 show(shadow_hand_left_rbt,qConst)
+
+%%
+rbt = importrobot('shadow_hand_left_only_move_lf.urdf');
+jointLimits = constraintJointBounds(rbt);
+find(jointLimits.Bounds(:,1) == -1)
