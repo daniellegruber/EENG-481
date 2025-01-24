@@ -1,20 +1,17 @@
 %% Create target pose of little finger tip (lftip)
-% Get a "curled in" little finger by trying to get the little finger tip
-% (lftip) as close to palm as possible, and orienting it so that its z-axis
-% points into the palm
+% This is just for testing. Obviously for the real thing we wouldn't get
+% the target pose from a specified configuration -- that defeats the whole
+% purpose. This is to see whether the configuration achieved by the solver
+% matches the configuration (targetConfig) from which targetPose is derived.
 
 load("fist.mat","jointValues");
 
-q0=homeConfiguration(shadow_hand_right_rbt);
+targetConfig = repmat(struct('JointName','', 'JointPosition', 0), 1, nJoints);
+for i = 1:24
+    targetConfig(i) = struct('JointName', jointNames{i}, 'JointPosition', jointValues(i));
+end
 
-% End effector pose contraints
-lftip_to_world = se3(getTransform(shadow_hand_left_rbt,homeConfiguration(shadow_hand_left_rbt),"lftip","world"));
-palm_to_world = se3(getTransform(shadow_hand_left_rbt,homeConfiguration(shadow_hand_left_rbt),"palm","world"));
-
-T1 = se3(tform(palm_to_world)); % get translation vector for 
-R1 = se3(rotm(lftip_to_world)); % get home config orientation of lftip relative to world
-R2 = se3([0, deg2rad(270), 0],"eul","XYZ"); % rotate around by y axis by 270 deg
-targetPose = T1 * R1 * R2;
+targetPose = se3(getTransform(shadow_hand_right_rbt,targetConfig,"lftip","world"));
 
 %% Create solver
 gik = generalizedInverseKinematics('RigidBodyTree', shadow_hand_right_rbt, ...

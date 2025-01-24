@@ -1,0 +1,18 @@
+jointValues1 = load('Configs/number_1.mat', 'jointValues');
+jointValues1 = jointValues1.jointValues;
+jointValues2 = load('Configs/number_2.mat', 'jointValues');
+jointValues2 = jointValues2.jointValues;
+
+qWaypoints = [jointValues1; jointValues2];
+
+Ts = 0.001;
+framerate = 1/Ts; % number of samples per second
+r = rateControl(framerate);
+tFinal = 2;
+tWaypoints = [0,linspace(tFinal/2,tFinal,size(qWaypoints,1)-1)];
+%numFrames = tFinal*framerate;
+%qInterp = pchip(tWaypoints,qWaypoints',linspace(0,tFinal,numFrames))';
+qInterp = pchip(tWaypoints,qWaypoints',0:Ts:tFinal)';
+
+
+jointValuesToInputSignals(qInterp', jointNames, Ts, tFinal, 'number_1_to_2');

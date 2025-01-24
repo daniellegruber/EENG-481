@@ -6,6 +6,5 @@ jointValues = out.jointValues{1}.Values.Data(1,:);
 % Save joint values to mat files -- make sure to change mat file name
 % depending on which ASL sign you've recreated!
 %save('number_1.mat', "jointValues");
-fileName = 'number_3';
-save(['Configs', filesep, fileName, '.mat'], "jointValues");
-jointValuesToConstInputSignals(jointValues, jointNames, 0.001, 2, fileName)
+save('Configs/fist.mat', "jointValues");
+jointValuesToInputSignals(jointValues, jointNames, sampleTime, maxTime, fileName)
