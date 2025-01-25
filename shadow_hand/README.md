@@ -26,3 +26,24 @@ These are very similar to the files in the Base models folder, but these are the
 2. Configured the input ports to route desired joint angles to the joints (e.g., as opposed to torques) so that you can directly specify desired configurations
 3. Configured the output ports to output the actual signals in case of any mismatch with the input
 4. Wired the input ports to a subsystem where you can manually edit joint angles one by one
+
+Note that modifications 1-3 are present in all subsequently described Simulink models.
+
+To see the result of your changes, simply run the simulation. A Mechanics Explorer window should pop up that shows the hand in the updated configuration.
+
+Finally, note that you can run the script `get_joint_values.m` to save the joint values you've manually defined in one of the models of this folder.
+
+## Signals
+
+If you want to visualize a sequence of joint configurations, you can use the helper function `jointValuesToInputSignals` ("Helper functions" folder). Calling this function with the appropriate inputs will generate a mat file containing a Simulink dataset in the Signals folder. This mat file can then be loaded by a model in the "Test signal models" folder, as described below.  
+
+## Test signal models
+
+Here, the input ports of the Robot system are wired to a Signal Editor block. To test a certain sequence of joint configurations in the Signals folder, simply:
+1. Double-click the Signal Editor block
+2. In the File name box, choose the desired mat file (from the Signals folder) that you want to see
+3. Upon running the simulation, a Mechanics Explorer window should pop up that shows the hand going through the sequence of configurations
+
+## Inverse kinematics
+
+The code in this folder generates configurations corresponding to ASL signs programmatically, in particular, using inverse kinematics. See [this doc](https://docs.google.com/document/d/1UxFYyjYZJJsubn2o0A_L4ytDzZd5ZUhHJyOhD95Q6RQ/edit?usp=sharing) for an explanation.
