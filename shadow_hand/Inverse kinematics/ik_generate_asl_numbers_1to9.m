@@ -7,7 +7,7 @@ rbt = shadow_hand_right_rbt;
 q0 = homeConfiguration(rbt);
 valuesPrev = zeros(1,24);
 
-numberIdx = 1;
+numberIdx = 9;
 pose_name = number_pose_params(numberIdx).name;
 curledInFingers = number_pose_params(numberIdx).curledInFingers;
 thumbRestingFinger = number_pose_params(numberIdx).thumbRestingFinger;
@@ -177,5 +177,3 @@ jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, ...
 % jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, ...
 %     ['signals ', char(datetime('now', 'Format', 'd-MMM-y HH-mm-ss'))]);
 end
-
-

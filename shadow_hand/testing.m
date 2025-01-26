@@ -193,3 +193,9 @@ qInterp = pchip(tWaypoints,qWaypoints',0:Ts:tFinal)';
 
 
 jointValuesToInputSignals(qInterp', jointNames, Ts, tFinal, 'numbers_1_to_9');
+
+%%
+rftip_to_world = se3(getTransform(rbt,q0,"rftip","world"));
+rftiphome_to_world = se3(getTransform(rbt,homeConfiguration(rbt),"rftip","world"));
+rftip_to_rftiphome = rftip_to_world * inv(rftiphome_to_world);
+rad2deg(rotm2eul(rotm(rftip_to_rftiphome), "XYZ"))

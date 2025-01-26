@@ -51,7 +51,7 @@ number_pose_params(6).name = 'number_6';
 number_pose_params(6).curledInFingers = {};
 number_pose_params(6).thumbRestingFinger = {};
 number_pose_params(6).thumbTouchesFinger = {'LF'};
-number_pose_params(6).afterAdjustments = {'RFJ4',deg2rad(-4), 'MFJ4',deg2rad(0),'FFJ4',deg2rad(-4)};
+number_pose_params(6).afterAdjustments = {'RFJ4',deg2rad(-4), 'FFJ4',deg2rad(-4)};
 
 %% Number 7
 number_pose_params(7).name = 'number_7';
@@ -72,4 +72,4 @@ number_pose_params(9).name = 'number_9';
 number_pose_params(9).curledInFingers = {};
 number_pose_params(9).thumbRestingFinger = {};
 number_pose_params(9).thumbTouchesFinger = {'FF'};
-number_pose_params(9).afterAdjustments = {'LFJ4',deg2rad(-8), 'RFJ4',deg2rad(-4), 'MFJ4',deg2rad(1),};
+number_pose_params(9).afterAdjustments = {'LFJ4',deg2rad(-8), 'RFJ4',deg2rad(-4), 'MFJ4',deg2rad(1)};
