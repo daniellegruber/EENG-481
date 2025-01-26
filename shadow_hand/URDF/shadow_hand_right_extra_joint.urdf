@@ -25,10 +25,13 @@
 -->
 <robot name="shadow_right">
   <link name="world"/>
-  <joint name="world_joint" type="fixed">
+  <joint name="ARMJ1" type="revolute">
     <parent link="world"/>
     <child link="forearm"/>
-    <origin rpy="0.0 0.0 1.57079" xyz="0.0 0.0 0.0"/>
+    <origin rpy="0 0 1.57079" xyz="0 -0.010 0.21301"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" lower="-3.1416" upper="3.1416" velocity="2.0"/>
+    <dynamics damping="0.1"/>
   </joint>
   <link name="forearm">
     <inertial>
