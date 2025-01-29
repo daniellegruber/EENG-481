@@ -1,4 +1,5 @@
-function jointValuesToInputSignals(jointValues, jointNames, sampleTime, maxTime, fileName)
+function ds = jointValuesToInputSignals(jointValues, jointNames, ...
+    sampleTime, maxTime, fileName)
 % jointValues is n x m array, n corresponds to number of joints and m
 % corresponds to number of time samples
 
@@ -9,6 +10,8 @@ for i=1:size(jointValues, 1)
     trajectory = timeseries(jointValues(i, :), time_samples);
     ds = addElement(ds, trajectory, jointNames{i});
 end
-save(['Signals', filesep, fileName, '.mat'], 'ds');
+if ~isempty(fileName)
+    save(['Signals', filesep, fileName, '.mat'], 'ds');
+end
 
 end

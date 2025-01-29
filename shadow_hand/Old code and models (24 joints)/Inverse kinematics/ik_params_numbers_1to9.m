@@ -16,35 +16,35 @@ number_pose_params(1).name = 'number_1';
 number_pose_params(1).curledInFingers = {'LF', 'RF', 'MF'};
 number_pose_params(1).thumbRestingFinger = {'RF'};
 number_pose_params(1).thumbTouchesFinger = {};
-number_pose_params(1).afterAdjustments = {'ARMJ1', deg2rad(180)};
+number_pose_params(1).afterAdjustments = {};
 
 %% Number 2
 number_pose_params(2).name = 'number_2';
 number_pose_params(2).curledInFingers = {'LF', 'RF'};
 number_pose_params(2).thumbRestingFinger = {'RF'};
 number_pose_params(2).thumbTouchesFinger = {};
-number_pose_params(2).afterAdjustments = {'ARMJ1', deg2rad(180), 'MFJ4',deg2rad(4),'FFJ4',deg2rad(-4)};
+number_pose_params(2).afterAdjustments = {'MFJ4',deg2rad(4),'FFJ4',deg2rad(-4)};
 
 %% Number 3
 number_pose_params(3).name = 'number_3';
 number_pose_params(3).curledInFingers = {'LF', 'RF'};
 number_pose_params(3).thumbRestingFinger = {};
 number_pose_params(3).thumbTouchesFinger = {};
-number_pose_params(3).afterAdjustments = {'ARMJ1', deg2rad(180), 'MFJ4',deg2rad(4),'FFJ4',deg2rad(-4)};
+number_pose_params(3).afterAdjustments = {'MFJ4',deg2rad(4),'FFJ4',deg2rad(-4)};
 
 %% Number 4
 number_pose_params(4).name = 'number_4';
 number_pose_params(4).curledInFingers = {};
 number_pose_params(4).thumbRestingFinger = {'LF'};
 number_pose_params(4).thumbTouchesFinger = {};
-number_pose_params(4).afterAdjustments = {'ARMJ1', deg2rad(180), 'LFJ4',deg2rad(-8),'RFJ4',deg2rad(-4), 'MFJ4',deg2rad(0),'FFJ4',deg2rad(-4)};
+number_pose_params(4).afterAdjustments = {'LFJ4',deg2rad(-8),'RFJ4',deg2rad(-4), 'MFJ4',deg2rad(0),'FFJ4',deg2rad(-4)};
 
 %% Number 5
 number_pose_params(5).name = 'number_5';
 number_pose_params(5).curledInFingers = {};
 number_pose_params(5).thumbRestingFinger = {};
 number_pose_params(5).thumbTouchesFinger = {};
-number_pose_params(5).afterAdjustments = {'ARMJ1', deg2rad(180), 'LFJ4',deg2rad(-8),'RFJ4',deg2rad(-4), 'MFJ4',deg2rad(0),'FFJ4',deg2rad(-4)};
+number_pose_params(5).afterAdjustments = {'LFJ4',deg2rad(-8),'RFJ4',deg2rad(-4), 'MFJ4',deg2rad(0),'FFJ4',deg2rad(-4)};
 
 %% Number 6
 number_pose_params(6).name = 'number_6';

@@ -2,15 +2,23 @@
 
 % Reminder: se3(trvec(tip_to_world), 'trvec') * se3(rotm(tip_to_world)) == tip_to_world
 
+jointNames = {'ARMJ1','WRJ2', 'WRJ1', 'FFJ4', 'FFJ3', 'FFJ2', 'FFJ1', 'LFJ5', 'LFJ4', 'LFJ3', 'LFJ2', 'LFJ1', ...
+    'MFJ4', 'MFJ3', 'MFJ2', 'MFJ1', 'RFJ4', 'RFJ3', 'RFJ2', 'RFJ1', 'THJ5', 'THJ4', 'THJ3', 'THJ2', 'THJ1'};
+
+nJoints = 25;
+
 pose_name = 'number_0';
 fingerNames = {'LF', 'RF', 'MF', 'FF', 'TH'};
-rbt = shadow_hand_right_rbt;
+%rbt = shadow_hand_right_rbt;
+rbt = importrobot(['URDF', filesep, 'shadow_hand_right_extra_joint.urdf']);
 q0 = homeConfiguration(rbt);
-valuesPrev = zeros(1,24);
+valuesPrev = zeros(1,nJoints);
 
 xoffset_from_palm = [0.083, 0.08, 0.08, 0.08];
 yoffset_from_palm = [-0.022, -0.004 0.01, 0.025];
 zoffset_from_palm = [0.075, 0.08, 0.079, 0.077];
+
+afterAdjustments = {'ARMJ1', deg2rad(90)};
 
 for fingerIdx = 1:5
 %% Set up target pose of tip
@@ -71,7 +79,7 @@ if positionOrPose == 1
 end
 
 % Joint constraints -- only want little finger lf to move
-jointLimits = constraintJointBounds(shadow_hand_right_rbt);
+jointLimits = constraintJointBounds(rbt);
 oldBounds = jointLimits.Bounds;
 upperBounds = oldBounds(:,2);
 lowerBounds = oldBounds(:,1);
@@ -80,7 +88,7 @@ nonFingerIdx = ~startsWith(jointNames,fingerNames{fingerIdx});
 upperBounds(nonFingerIdx) = valuesPrev(nonFingerIdx); 
 lowerBounds(nonFingerIdx) = valuesPrev(nonFingerIdx); 
 jointLimits.Bounds = [lowerBounds, upperBounds];
-jointLimits.Weights = 20 * ones(1, 24);
+jointLimits.Weights = 20 * ones(1, nJoints);
 
 %% Run solver
 if positionOrPose == 1
@@ -92,6 +100,13 @@ solJointValues = vertcat(qSol.JointPosition);
 solJointValues(abs(solJointValues) < 1e-3)=0;
 
 if fingerIdx == 5
+    if ~isempty(afterAdjustments)
+        for i = 1:2:length(afterAdjustments)
+            jointIdx = contains(jointNames, afterAdjustments{i});
+            jointValue = afterAdjustments{i+1};
+            solJointValues(jointIdx) = jointValue;
+        end
+    end
     jointValues = solJointValues;
     jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, pose_name);
     save(['Configs', filesep, pose_name, '.mat'], "jointValues");

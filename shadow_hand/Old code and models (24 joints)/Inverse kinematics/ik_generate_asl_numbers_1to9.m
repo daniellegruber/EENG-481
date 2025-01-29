@@ -2,13 +2,12 @@
 
 % Reminder: se3(trvec(tip_to_world), 'trvec') * se3(rotm(tip_to_world)) == tip_to_world
 
-%rbt = shadow_hand_right_rbt;
-rbt = importrobot(['URDF', filesep, 'shadow_hand_right_extra_joint.urdf']);
-
-for numberIdx = 1:9
+fingerNames = {'LF', 'RF', 'MF', 'FF', 'TH'};
+rbt = shadow_hand_right_rbt;
 q0 = homeConfiguration(rbt);
-valuesPrev = zeros(1,nJoints);
+valuesPrev = zeros(1,24);
 
+numberIdx = 9;
 pose_name = number_pose_params(numberIdx).name;
 curledInFingers = number_pose_params(numberIdx).curledInFingers;
 thumbRestingFinger = number_pose_params(numberIdx).thumbRestingFinger;
@@ -128,7 +127,7 @@ end
 gik.SolverParameters.MaxTime = 2;
 
 % Joint constraints -- only want little finger lf to move
-jointLimits = constraintJointBounds(rbt);
+jointLimits = constraintJointBounds(shadow_hand_right_rbt);
 oldBounds = jointLimits.Bounds;
 upperBounds = oldBounds(:,2);
 lowerBounds = oldBounds(:,1);
@@ -137,7 +136,7 @@ nonFingerIdx = ~startsWith(jointNames,fingerNames{fingerIdx});
 upperBounds(nonFingerIdx) = valuesPrev(nonFingerIdx); 
 lowerBounds(nonFingerIdx) = valuesPrev(nonFingerIdx); 
 jointLimits.Bounds = [lowerBounds, upperBounds];
-jointLimits.Weights = 20 * ones(1, nJoints);
+jointLimits.Weights = 20 * ones(1, 24);
 
 %% Run solver
 if fingerIdx < 5
@@ -177,5 +176,4 @@ jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, ...
 
 % jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, ...
 %     ['signals ', char(datetime('now', 'Format', 'd-MMM-y HH-mm-ss'))]);
-end
 end
