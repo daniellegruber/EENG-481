@@ -7,9 +7,11 @@ To set up the environment, open import_robot.m and run the script. This will 1) 
 
 This folder contains the URDF files from which the robotic hand models are derived. These files were downloaded from [this Github repo](https://github.com/dexsuite/dex-urdf/blob/main/robots/hands/shadow_hand) but originate from [this Github repo](https://github.com/shadow-robot/sr_common/tree/noetic-devel) which is directly from the Shadow Robot company. I used the former repo instead of the latter because the former seems to have modified the URDF file to a format that is coincidentally compatible with Matlab/Simulink (it doesn’t have substitution arguments, i.e., stuff like $(...) ).
 
-The URDF files are slightly modified to use stl files instead of obj files since Matlab/Simulink doesn't use obj files.
+I modified the original URDF files in the following ways:
+1. Replaced obj file references with equivalent stl file references since Matlab/Simulink doesn't use obj files
+2. Replaced fixed world_joint with a revolute joint ARMJ1 to allow the specification of palm orientation (e.g., palm facing away from observer for ASL numbers 1-5 and  palm facing toward observer for ASL numbers 6-9)
 
-Finally, note that the hands specified by the URDF files correspond to [this datasheet](https://www.shadowrobot.com/wp-content/uploads/2022/03/shadow_dexterous_hand_e_technical_specification.pdf) which is from the [Shadow Robot company's website](https://shadow-robot-company-dexterous-hand.readthedocs-hosted.com/en/latest/index.html). 
+Finally, note that the hands specified by the original URDF files correspond to [this datasheet](https://www.shadowrobot.com/wp-content/uploads/2022/03/shadow_dexterous_hand_e_technical_specification.pdf) which is from the [Shadow Robot company's website](https://shadow-robot-company-dexterous-hand.readthedocs-hosted.com/en/latest/index.html). 
 
 ## meshes
 
@@ -17,7 +19,9 @@ This folder contains the visuals needed to visualize the robotic hands. These fi
 
 ## Base models
 
-This folder contains the Simulink models that directly result from calling `smimport` on the URDF files contained in the URDF folder, e.g., `smimport("shadow_hand_left.urdf", "ModelName","shadow_hand_left");`. You probably won't need to access these models.
+This folder contains the Simulink models that directly result from calling `smimport` on the URDF files contained in the URDF folder, e.g., `smimport("URDF/shadow_hand_left_25df.urdf", "ModelName","shl25df");`. You probably won't need to access these models.
+
+Note that the prefixes "shl25df" and "shr25df" in model names correspond to the shadow hand left and shadow hand right models, respectively, modified to have 25 joints instead of the original 24. In other words, models with these prefixes have robots derived from "URDF/shadow_hand_left_25df.urdf" and "URDF/shadow_hand_right_25df.urdf", respectively.
 
 ## Quick edit models
 
@@ -44,6 +48,14 @@ Here, the input ports of the Robot system are wired to a Signal Editor block. To
 2. In the File name box, choose the desired mat file (from the Signals folder) that you want to see
 3. Upon running the simulation, a Mechanics Explorer window should pop up that shows the hand going through the sequence of configurations
 
+## User input 
+
+Here, the input ports of the Robot system are wired to model-level input ports that can be configured to supply external input. The functions `supplyInputToUserInputMdlByDs` and `supplyInputToUserInputMdlByMat` in the "Helper functions" folder will help you programmatically supply this input via Simulink dataset and mat file, respectively. See `userInputTrajectoryDemo.m` for an example of using these functions.
+
 ## Inverse kinematics
 
 The code in this folder generates configurations corresponding to ASL signs programmatically, in particular, using inverse kinematics. See [this doc](https://docs.google.com/document/d/1UxFYyjYZJJsubn2o0A_L4ytDzZd5ZUhHJyOhD95Q6RQ/edit?usp=sharing) for an explanation.
+
+## Old code and models (24 joints)
+
+This folder contains old code and models corresponding to the original, 24-joint robot models. 
