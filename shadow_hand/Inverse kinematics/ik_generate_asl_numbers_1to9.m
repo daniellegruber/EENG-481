@@ -2,8 +2,7 @@
 
 % Reminder: se3(trvec(tip_to_world), 'trvec') * se3(rotm(tip_to_world)) == tip_to_world
 
-%rbt = shadow_hand_right_rbt;
-rbt = importrobot(['URDF', filesep, 'shadow_hand_right_extra_joint.urdf']);
+rbt = shr25df_rbt;
 
 for numberIdx = 1:9
 q0 = homeConfiguration(rbt);
