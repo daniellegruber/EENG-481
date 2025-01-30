@@ -11,6 +11,7 @@ valuesPrev = zeros(1,nJoints);
 xoffset_from_palm = zeros(1,4);
 yoffset_from_knuckle = [0.012, 0.01 0, -0.01];
 zoffset_from_palm = [0.04, 0.04, 0.04, 0.04];
+%zoffset_from_palm = [0.04, 0.04, 0.04, 0.04]+0.01; % try this out later
 
 afterAdjustments = {};
 

@@ -4,60 +4,50 @@
 
 rbt = shr25df_rbt;
 
-pose_name = 'letter_b';
+pose_name = 'letter_c';
 q0 = homeConfiguration(rbt);
 valuesPrev = zeros(1,nJoints);
-afterAdjustments = {};
+
+% xoffset_from_palm = [0.08, 0.08, 0.08, 0.08, 0.08];
+% yoffset_from_knuckle = [0.012, 0.01 0, -0.01, -0.01];
+% zoffset_from_palm = [0.08, 0.08, 0.08, 0.08, 0.05];
+
+xoffset_from_palm = [0.08, 0.077, 0.077, 0.077, 0.077];
+yoffset_from_knuckle = [0.012, 0.01 0, -0.01, -0.01];
+zoffset_from_palm = [0.08, 0.08, 0.082, 0.08, 0.05];
+
+afterAdjustments = {'ARMJ1', deg2rad(90)};
 
 for fingerIdx = 1:5
 %% Set up target pose of tip
 tip_frame = [lower(fingerNames{fingerIdx}),'tip'];
 tip_to_world = se3(getTransform(rbt,q0,tip_frame,"world"));
-if fingerIdx == 5 % Thumb
-    % % Get transforms of certain frames relative to world in home config
-    % lfknuckle_to_world = se3(getTransform(rbt,q0,'lfknuckle',"world"));
-    % 
-    % % Create target translation
-    % trvec_lfknuckle = trvec(lfknuckle_to_world); 
-    % trvec_target = trvec_lfknuckle;
-    % trvec_target(1) = trvec_target(1) + 0; 
-    % trvec_target(2) = trvec_target(2) + 0.03; 
-    % trvec_target(3) = trvec_target(3) - 0.2;
-    % T1 = se3(trvec_target, "trvec");
-    % 
-    % % Get target rotation
-    % 
-    % % R1 = se3(rotm(tip_to_world)); 
-    % % Now define angles relative to world frame
-    % %R2 = se3([0, 0, 0],"eul","XYZ"); 
-    % 
-    % R1 = se3([deg2rad(90), 0, 0],"eul","XYZ"); 
-    % 
-    % % Create target pose
-    % targetPose = T1 * R1; %* R1 * R2;
-    % positionOrPose = 1;
+distanceConstraint = constraintPositionTarget(tip_frame);
+distanceConstraint.ReferenceBody = 'world';
 
-    distanceConstraint = constraintPositionTarget(tip_frame);
-    distanceConstraint.ReferenceBody = 'world';
-
-    % Get transforms of certain frames relative to world in home config
-    lfknuckle_to_world = se3(getTransform(rbt,q0,'lfknuckle',"world"));
-
-    % Create target translation
-    trvec_lfknuckle = trvec(lfknuckle_to_world); 
-    trvec_target = trvec_lfknuckle;
-    trvec_target(1) = trvec_target(1) + 0.02; 
-    trvec_target(2) = trvec_target(2) + 0.04; 
-    trvec_target(3) = trvec_target(3) - 0.02;
-
-    distanceConstraint.TargetPosition = trvec_target;
-    distanceConstraint.PositionTolerance = 0;%1e-3;
-    positionOrPose = 0;
-
-else % Other four fingers
-    targetPose = tip_to_world;
-    positionOrPose = 1;
+if fingerIdx == 5
+    knuckle_frame = 'thbase';
+else
+    knuckle_frame = [lower(fingerNames{fingerIdx}),'knuckle'];
 end
+
+% Get transforms of certain frames relative to world in home config
+knuckle_to_world = se3(getTransform(rbt,q0,knuckle_frame,"world"));
+palm_to_world = se3(getTransform(rbt,q0,"palm","world"));
+
+% Create target translation
+trvec_palm = trvec(palm_to_world); 
+trvec_tip = trvec(tip_to_world); 
+trvec_knuckle = trvec(knuckle_to_world); 
+
+trvec_target = trvec_palm;
+trvec_target(1) = trvec_palm(1) + xoffset_from_palm(fingerIdx);
+trvec_target(2) = trvec_knuckle(2)+ yoffset_from_knuckle(fingerIdx);
+trvec_target(3) = trvec_palm(3) + zoffset_from_palm(fingerIdx);
+
+distanceConstraint.TargetPosition = trvec_target;
+distanceConstraint.PositionTolerance = 0;%1e-3;
+positionOrPose = 0;
 
 %% Create solver
 if positionOrPose==0
@@ -138,6 +128,43 @@ supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
 
 %% For debugging
 thtip_to_world = se3(getTransform(rbt,q0,'thtip',"world"));
-lfknuckle_to_world = se3(getTransform(rbt,q0,'lfknuckle',"world"));
-disp(trvec(thtip_to_world) - trvec(lfknuckle_to_world))
-disp(rad2deg(rotm2eul(rotm(thtip_to_world), 'XYZ')))
+fftip_to_world = se3(getTransform(rbt,q0,'fftip',"world"));
+mftip_to_world = se3(getTransform(rbt,q0,'mftip',"world"));
+rftip_to_world = se3(getTransform(rbt,q0,'rftip',"world"));
+lftip_to_world = se3(getTransform(rbt,q0,'lftip',"world"));
+palm_to_world = se3(getTransform(rbt,q0,'palm',"world"));
+
+disp('thtip offsets:\n')
+thtip_palm_offset = trvec(thtip_to_world) - trvec(palm_to_world);
+thtip_base_offset = trvec(thtip_to_world) - trvec(se3(getTransform(rbt,q0,'thbase',"world")));
+thtip_offset = thtip_palm_offset;
+thtip_offset(2) = thtip_base_offset(2);
+disp(thtip_offset)
+
+disp('fftip offsets:\n')
+fftip_palm_offset = trvec(fftip_to_world) - trvec(palm_to_world);
+fftip_base_offset = trvec(fftip_to_world) - trvec(se3(getTransform(rbt,q0,'ffknuckle',"world")));
+fftip_offset = fftip_palm_offset;
+fftip_offset(2) = fftip_base_offset(2);
+disp(fftip_offset)
+
+disp('mftip offsets:\n')
+mftip_palm_offset = trvec(mftip_to_world) - trvec(palm_to_world);
+mftip_base_offset = trvec(mftip_to_world) - trvec(se3(getTransform(rbt,q0,'mfknuckle',"world")));
+mftip_offset = mftip_palm_offset;
+mftip_offset(2) = mftip_base_offset(2);
+disp(mftip_offset)
+
+disp('rftip offsets:\n')
+rftip_palm_offset = trvec(rftip_to_world) - trvec(palm_to_world);
+rftip_base_offset = trvec(rftip_to_world) - trvec(se3(getTransform(rbt,q0,'rfknuckle',"world")));
+rftip_offset = rftip_palm_offset;
+rftip_offset(2) = rftip_base_offset(2);
+disp(rftip_offset)
+
+disp('lftip offsets:\n')
+lftip_palm_offset = trvec(lftip_to_world) - trvec(palm_to_world);
+lftip_base_offset = trvec(lftip_to_world) - trvec(se3(getTransform(rbt,q0,'lfknuckle',"world")));
+lftip_offset = lftip_palm_offset;
+lftip_offset(2) = lftip_base_offset(2);
+disp(lftip_offset)

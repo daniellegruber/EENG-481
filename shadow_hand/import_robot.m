@@ -11,7 +11,7 @@
 % smimport("URDF/shadow_hand_left_25df.urdf", "ModelName","shl25df");
 % smimport("URDF/shadow_hand_right_25df.urdf", "ModelName","shr25df");
 
-%% Get rigidBodyTree objects required for some Simscape Multibody blocks (THIS SECTION NOW OBSOLETE)
+%% 24DF: Get rigidBodyTree objects required for some Simscape Multibody blocks (THIS SECTION NOW OBSOLETE)
 % % shadow_hand_left_rbt = importrobot("shadow_hand_left.slx");
 % % shadow_hand_right_rbt = importrobot("shadow_hand_right.slx");
 % 
@@ -21,7 +21,16 @@
 % shadow_hand_left_rbt = importrobot(['URDF', filesep, 'shadow_hand_left.urdf']);
 % shadow_hand_right_rbt = importrobot(['URDF', filesep, 'shadow_hand_right.urdf']);
 
-%% Get rigidBodyTree objects required for some Simscape Multibody blocks
+%% 256F: Get rigidBodyTree objects required for some Simscape Multibody blocks (THIS SECTION NOW OBSOLETE)
+
+% % Import directly from urdf, not simulink file, because this method
+% % auto assigns the bodies their associated names which is convenient for
+% % selecting certain bodies to serve as end-effectors
+% 
+% shl26df_rbt = importrobot(['URDF', filesep, 'shadow_hand_left_26df.urdf']);
+% shr26df_rbt = importrobot(['URDF', filesep, 'shadow_hand_right_26df.urdf']);
+
+%% 25DF: Get rigidBodyTree objects required for some Simscape Multibody blocks
 
 % Import directly from urdf, not simulink file, because this method
 % auto assigns the bodies their associated names which is convenient for
@@ -35,7 +44,7 @@ addpath("meshes");
 
 addpath("Helper functions");
 
-%% Joint names (THIS SECTION IS NOW OBSOLETE)
+%% 24DF: Joint names (THIS SECTION IS NOW OBSOLETE)
 % Names of joints corresponding to bounds extracted via constraintJointBounds
 % I figured out the matching by comparing the default bounds to those in the urdf file
 % This ordering now aligns to the ordering of input/output ports of robot subsystems in Simulink files 
@@ -44,6 +53,16 @@ addpath("Helper functions");
 %     'MFJ4', 'MFJ3', 'MFJ2', 'MFJ1', 'RFJ4', 'RFJ3', 'RFJ2', 'RFJ1', 'THJ5', 'THJ4', 'THJ3', 'THJ2', 'THJ1'};
 % 
 % nJoints = 24;
+
+%% 26DF: Joint names (THIS SECTION IS NOW OBSOLETE)
+% Names of joints corresponding to bounds extracted via constraintJointBounds
+% I figured out the matching by comparing the default bounds to those in the urdf file
+% This ordering now aligns to the ordering of input/output ports of robot subsystems in Simulink files 
+
+% jointNames = {'ARMJ1','WRJ2', 'WRJ1', 'FFJ4', 'FFJ3', 'FFJ2', 'FFJ1', 'LFJ5', 'LFJ4', 'LFJ3', 'LFJ2', 'LFJ1', ...
+%     'MFJ4', 'MFJ3', 'MFJ2', 'MFJ1', 'RFJ4', 'RFJ3', 'RFJ2', 'RFJ1', 'THJ6', 'THJ5', 'THJ4', 'THJ3', 'THJ2', 'THJ1'};
+% 
+% nJoints = 26;
 
 %% Joint names
 % Names of joints corresponding to bounds extracted via constraintJointBounds

@@ -851,7 +851,7 @@
     <child link="thmiddle"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit effort="2.0" lower="-0.698131700798" upper="0.698131700798" velocity="2.0"/>
+    <limit effort="2.0" lower="-0.698131700798" upper="2.0944" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
   <!-- common -->
