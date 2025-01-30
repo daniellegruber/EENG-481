@@ -10,6 +10,7 @@ This folder contains the URDF files from which the robotic hand models are deriv
 I modified the original URDF files in the following ways:
 1. Replaced obj file references with equivalent stl file references since Matlab/Simulink doesn't use obj files
 2. Replaced fixed world_joint with a revolute joint ARMJ1 to allow the specification of palm orientation (e.g., palm facing away from observer for ASL numbers 1-5 and  palm facing toward observer for ASL numbers 6-9)
+3. Changed upper bound of THJ2 from 40 deg to 120 deg to better accommodate signs such as the letter e
 
 Finally, note that the hands specified by the original URDF files correspond to [this datasheet](https://www.shadowrobot.com/wp-content/uploads/2022/03/shadow_dexterous_hand_e_technical_specification.pdf) which is from the [Shadow Robot company's website](https://shadow-robot-company-dexterous-hand.readthedocs-hosted.com/en/latest/index.html). 
 
@@ -56,6 +57,10 @@ Here, the input ports of the Robot system are wired to model-level input ports t
 
 The code in this folder generates configurations corresponding to ASL signs programmatically, in particular, using inverse kinematics. See [this doc](https://docs.google.com/document/d/1UxFYyjYZJJsubn2o0A_L4ytDzZd5ZUhHJyOhD95Q6RQ/edit?usp=sharing) for an explanation.
 
-## Old code and models (24 joints)
+## 24df code and models
 
-This folder contains old code and models corresponding to the original, 24-joint robot models. 
+This folder contains old code and models corresponding to the original 24-joint robot models. 
+
+## 26df code and models
+
+This folder contains code and models corresponding to a 26-joint robot that I briefly experimented with. In addition to the extra ARMJ1 joint described above, these models feature an extra thumb joint THJ5 (the original THJ5 corresponds to THJ6 in these models) that allows rotation of the thbase link along another axis. I initially thought this was necessary to achieve certain signs where the thtip link ends up on the other side of the palm (e.g., the sign for the letter e), but the increase I made to the upper bound of THJ2 in the 25df models might be sufficient.
