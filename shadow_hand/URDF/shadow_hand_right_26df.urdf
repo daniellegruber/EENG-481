@@ -24,6 +24,15 @@
  software, even if advised of the possibility of such damage.
 -->
 <robot name="shadow_right">
+  <link name="world2"/>
+  <joint name="ARMJ2" type="prismatic">
+    <parent link="world2"/>
+    <child link="world"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" lower="-0.2" upper="0.2" velocity="2.0"/>
+    <dynamics damping="0.1"/>
+  </joint>
   <link name="world"/>
   <joint name="ARMJ1" type="revolute">
     <parent link="world"/>
@@ -107,7 +116,7 @@
     <child link="wrist"/>
     <origin rpy="0 0 0" xyz="0 -0.010 0.21301"/>
     <axis xyz="0 1 0"/>
-    <limit effort="10" lower="-0.523598775598" upper="0.174532925199" velocity="2.0"/>
+    <limit effort="10" lower="-1.5708" upper="1.5708" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
   <link name="palm">
@@ -187,7 +196,7 @@
     <child link="palm"/>
     <origin rpy="0 0 0" xyz="0 0 0.034"/>
     <axis xyz="1 0 0"/>
-    <limit effort="30" lower="-0.698131700798" upper="0.488692190558" velocity="2.0"/>
+    <limit effort="30" lower="-1.5708" upper="1.5708" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
   <link name="imu"/>
@@ -773,21 +782,11 @@
       </geometry>
     </collision>
   </link>
-  <joint name="THJ6" type="revolute">
+  <joint name="THJ5" type="revolute">
     <parent link="palm"/>
     <child link="thbase"/>
     <origin rpy="-0.785398163397 0 -1.57079632679" xyz="0.034 -0.00858 0.029"/>
     <axis xyz="0 0 -1"/>
-    <limit effort="5.0" lower="-1.0471975512" upper="1.0471975512" velocity="4.0"/>
-    <dynamics damping="0.2"/>
-  </joint>
-  <link name="thdummy">
-  </link>
-  <joint name="THJ5" type="revolute">
-    <parent link="thbase"/>
-    <child link="thdummy"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <axis xyz="1 0 0"/>
     <limit effort="5.0" lower="-1.0471975512" upper="1.0471975512" velocity="4.0"/>
     <dynamics damping="0.2"/>
   </joint>
@@ -810,7 +809,7 @@
     </collision>
   </link>
   <joint name="THJ4" type="revolute">
-    <parent link="thdummy"/>
+    <parent link="thbase"/>
     <child link="thproximal"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="0 1 0"/>
