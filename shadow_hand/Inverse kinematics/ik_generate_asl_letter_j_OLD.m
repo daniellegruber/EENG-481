@@ -34,14 +34,19 @@ trvec_palm_q0 = trvec(palm_to_world_q0);
 % yprop = [-0.2, -1.5, -2.5];
 % zprop = [0, 0.08, 0.2];
 
-xprop = [0, 0.08, 0.2, 0.6, 0.9, 1];
-yprop = [0.1, 0.3, 0.5, 0.9, 0.3, -0.1];
-zprop = [0, 0.08, 0.2, 0.7, 0.9, 1];
+xprop = [0, 0.08, 0.2, 0.6, 0.9, 1, 0.6, 0];
+yprop = [0.1, 0.3, 0.5, 0.9, 0.3, -0.1, -0.9, -1.3];
+zprop = [0, 0.08, 0.2, 0.7, 0.9, 1, 0.6, 0];
+
+endValues = startValues;
+endValues(1) = deg2rad(180);
+qf = jointValuesToConfigObj(endValues, jointNames);
 
 afterAdjustments = {};
-for stage = 7
+for stage = 7:8
 %% Set up target pose of tip
 % lftip_to_world = se3(getTransform(rbt,q0,'lftip',"world"));
+
 distanceConstraint = constraintPositionTarget('lftip');
 distanceConstraint.ReferenceBody = 'world';
 
@@ -74,6 +79,7 @@ distanceConstraint.ReferenceBody = 'world';
 % trvec_target(1) = trvec_lftip_q0(1) + xprop(stage) * (trvec_lftip_q0(3) - trvec_palm_q0(3));
 % trvec_target(2) = trvec_lftip_q0(2) + yprop(stage) * (trvec_palm_q0(2) - trvec_lftip_q0(2));
 % trvec_target(3) = trvec_lftip_q0(3) + zprop(stage) * (trvec_palm_q0(3) - trvec_lftip_q0(3));
+
 
 trvec_target = zeros(1,3);
 trvec_target(1) = trvec_lftip_q0(1) + xprop(stage) * (trvec_lftip_q0(3) - trvec_palm_q0(3));
@@ -172,9 +178,17 @@ end
 
 %% Generate trajectory between signs
 % signSeq = {'letter_j_stage_1', 'letter_j_stage_2', 'letter_j_stage_3', 'letter_j_stage_4', 'letter_j_stage_5'};
-signSeq = {'letter_i', 'letter_j_stage_3', 'letter_j_stage_6'};
+% signSeq = {'letter_i', 'letter_j_stage_3', 'letter_j_stage_6', 'letter_j_stage_7', 'letter_j_stage_9'};
+% signSeq = {'letter_i', 'letter_j_stage_3', 'letter_j_stage_6', 'letter_j_stage_9'};
+signSeq = {'letter_i', 'letter_j_stage_6', 'letter_j_stage_9'};
 prevConfig = startValues;
 [ds, lastConfig] = genConfigTrajectoryFromInput(signSeq, prevConfig, jointNames);
 
 % Show robotic hand
 supplyInputToUserInputMdlByDs(mdl, ds);
+
+%%
+endValues = startValues;
+endValues(1) = deg2rad(180);
+jointValues = endValues;
+save(['Configs', filesep, pose_name, '_stage_9.mat'], "jointValues");

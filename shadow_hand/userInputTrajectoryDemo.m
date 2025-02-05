@@ -1,6 +1,7 @@
 mdl = "User input models/shr25df_user_input.slx";
 %mdl = "User input models/shl25df_user_input.slx";
 
+%% Number demo
 numberSeq = input('Please enter a sequence of numbers to sign:\n', "s");
 prevConfig = zeros(1, nJoints); % start in home config
 while ~strcmp(numberSeq, 'stop')
@@ -9,7 +10,7 @@ while ~strcmp(numberSeq, 'stop')
     signSeq = cellfun(@(x) ['number_', x], numberSeqParsed, 'UniformOutput', false);
     
     % Generate trajectory between signs
-    [ds, lastConfig] = genConfigTrajectoryFromInput(signSeq, prevConfig, jointNames);
+    [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, prevConfig, jointNames);
     
     % Show robotic hand
     supplyInputToUserInputMdlByDs(mdl, ds);
@@ -17,8 +18,35 @@ while ~strcmp(numberSeq, 'stop')
 
     % Set starting config of next trajectory to last config of this
     % trajectory
-    prevConfig = lastConfig;
+    prevConfig = qInterp(:, end);
 
     % Get next number sequence
     numberSeq = input('Please enter a sequence of numbers to sign:\n', "s");
+end
+
+%% Letter demo
+
+mdl = "User input models/shr25df_user_input.slx";
+%mdl = "User input models/shl25df_user_input.slx";
+
+letterSeq = input('Please enter a sequence of letters to sign:\n', "s");
+prevConfig = zeros(1, nJoints); % start in home config
+while ~strcmp(letterSeq, 'stop')
+    % Parse supplied sequence
+    letterSeqParsed = strsplit(letterSeq, ' ');
+    signSeq = cellfun(@(x) ['letter_', x], letterSeqParsed, 'UniformOutput', false);
+    
+    % Generate trajectory between signs
+    [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, prevConfig, jointNames);
+    
+    % Show robotic hand
+    supplyInputToUserInputMdlByDs(mdl, ds);
+    pause(length(signSeq)+1); % wait for Mechanics Explorer to show
+
+    % Set starting config of next trajectory to last config of this
+    % trajectory
+    prevConfig = qInterp(:, end);
+
+    % Get next number sequence
+    letterSeq = input('Please enter a sequence of letters to sign:\n', "s");
 end
