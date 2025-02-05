@@ -4,15 +4,14 @@
 
 rbt = shr25df_rbt;
 
-pose_name = 'letter_h';
+pose_name = 'letter_i';
 q0 = homeConfiguration(rbt);
 valuesPrev = zeros(1,nJoints);
 
-xoffset_from_palm = zeros(1,3);
-yoffset_from_knuckle = [0.012, 0.01 0];
-zoffset_from_palm = [0.04, 0.04, 0.04];
+xoffset_from_palm = zeros(1,4);
+yoffset_from_knuckle = [0.012, 0.01 0, -0.01];
+zoffset_from_palm = [0.04, 0.04, 0.04, 0.04];
 
-%afterAdjustments = {'ARMJ1', deg2rad(90), 'WRJ2', deg2rad(-70)};
 afterAdjustments = {};
 
 for fingerIdx = 1:5
@@ -31,37 +30,14 @@ if fingerIdx == 5 % Thumb
     trvec_tip = trvec(tip_to_world); 
 
     trvec_target = trvec_rfknuckle;
-    trvec_target(1) = trvec_target(1) + 0.02;
-    % trvec_target(2) = trvec_target(2) - 0.01;
-    % trvec_target(3) = trvec_target(3) + 0.05;
-    %trvec_target(3) = trvec_target(3) - 0.02;
+    trvec_target(1) = trvec_target(1) + 0.05;
 
     distanceConstraint.TargetPosition = trvec_target;
     distanceConstraint.PositionTolerance = 0;%1e-3;
     positionOrPose = 0;
-elseif fingerIdx == 3 || fingerIdx == 4
-    distanceConstraint = constraintPositionTarget(tip_frame);
-    distanceConstraint.ReferenceBody = 'world';
-
-    knuckle_frame = [lower(fingerNames{fingerIdx}),'knuckle'];
-    
-    % Get transforms of certain frames relative to world in home config
-    knuckle_to_world = se3(getTransform(rbt,q0,knuckle_frame,"world"));
-    palm_to_world = se3(getTransform(rbt,q0,"palm","world"));
-    
-    % Create target translation
-    trvec_palm = trvec(palm_to_world); 
-    trvec_tip = trvec(tip_to_world); 
-    trvec_knuckle = trvec(knuckle_to_world); 
-    
-    trvec_target = trvec_palm;
-    trvec_target(1) = trvec_palm(1) + 0.096;
-    trvec_target(2) = trvec_knuckle(2);
-    trvec_target(3) = trvec_knuckle(3);
-
-    distanceConstraint.TargetPosition = trvec_target;
-    distanceConstraint.PositionTolerance = 0;%1e-3;
-    positionOrPose = 0;
+elseif fingerIdx == 1
+    targetPose = tip_to_world;
+    positionOrPose = 1;
 else % Other four fingers
     distanceConstraint = constraintPositionTarget(tip_frame);
     distanceConstraint.ReferenceBody = 'world';
@@ -174,10 +150,7 @@ palm_to_world = se3(getTransform(rbt,q0,'palm',"world"));
 
 disp('thtip offsets:\n')
 thtip_rfknuckle_offset = trvec(thtip_to_world) - trvec(se3(getTransform(rbt,q0,'rfknuckle',"world")));
-%thtip_base_offset = trvec(thtip_to_world) - trvec(se3(getTransform(rbt,q0,'thbase',"world")));
-thtip_offset = thtip_palm_offset;
-%thtip_offset(2) = thtip_base_offset(2);
-disp(thtip_offset)
+disp(thtip_rfknuckle_offset)
 disp(rad2deg(rotm2eul(rotm(thtip_to_world), 'XYZ')))
 
 % disp('fftip offsets:\n')

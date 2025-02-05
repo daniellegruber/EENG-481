@@ -107,7 +107,7 @@
     <child link="wrist"/>
     <origin rpy="0 0 0" xyz="0 -0.010 0.21301"/>
     <axis xyz="0 1 0"/>
-    <limit effort="10" lower="-0.523598775598" upper="0.174532925199" velocity="2.0"/>
+    <limit effort="10" lower="-1.5708" upper="1.5708" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
   <link name="palm">
@@ -187,7 +187,7 @@
     <child link="palm"/>
     <origin rpy="0 0 0" xyz="0 0 0.034"/>
     <axis xyz="1 0 0"/>
-    <limit effort="30" lower="-0.698131700798" upper="0.488692190558" velocity="2.0"/>
+    <limit effort="30" lower="-1.5708" upper="1.5708" velocity="2.0"/>
     <dynamics damping="0.1"/>
   </joint>
   <link name="imu"/>
