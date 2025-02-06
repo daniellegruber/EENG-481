@@ -3,7 +3,7 @@
 
 % Reminder: se3(trvec(tip_to_world), 'trvec') * se3(rotm(tip_to_world)) == tip_to_world
 
-rbt = shr25df_rbt;
+rbt = shr26df_rbt;
 sign_name = 'letter_j';
 
 % Start position is letter i
@@ -13,7 +13,7 @@ q0 = jointValuesToConfigObj(startValues, jointNames);
 
 % End position is letter i, but ARMJ1=180 deg
 endValues = startValues;
-endValues(1) = deg2rad(180);
+endValues(ismember(jointNames, 'ARMJ1')) = deg2rad(180);
 jointValues = endValues;
 save(['Configs', filesep, sign_name, '_stage_2.mat'], "jointValues");
 
@@ -77,8 +77,9 @@ jointLimits = constraintJointBounds(rbt);
 oldBounds = jointLimits.Bounds;
 upperBounds = oldBounds(:,2);
 lowerBounds = oldBounds(:,1);
-upperBounds(4:end) = startValues(4:end); 
-lowerBounds(4:end) = startValues(4:end); 
+constrainIdx = ~ismember(jointNames, {'ARMJ1', 'WRJ2', 'WRJ1'});
+upperBounds(constrainIdx) = startValues(constrainIdx); 
+lowerBounds(constrainIdx) = startValues(constrainIdx); 
 jointLimits.Bounds = [lowerBounds, upperBounds];
 jointLimits.Weights = 20 * ones(1, nJoints);
 
@@ -102,8 +103,8 @@ qCurrent = jointValuesToConfigObj(solJointValues, jointNames); % Initial config 
 jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, ...
      'signals_after_solving_stage_1');
 
-mdl = "User input models/shr25df_user_input.slx";
-%mdl = "User input models/shl25df_user_input.slx";
+mdl = "User input models/shr26df_user_input.slx";
+%mdl = "User input models/shl26df_user_input.slx";
 
 % Show robotic hand
 supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_stage_1.mat');

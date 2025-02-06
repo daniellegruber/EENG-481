@@ -26,8 +26,8 @@ end
 
 %% Letter demo
 
-mdl = "User input models/shr25df_user_input.slx";
-%mdl = "User input models/shl25df_user_input.slx";
+mdl = "User input models/shr26df_user_input.slx";
+%mdl = "User input models/shl26df_user_input.slx";
 
 letterSeq = input('Please enter a sequence of letters to sign:\n', "s");
 prevConfig = zeros(1, nJoints); % start in home config

@@ -1,18 +1,15 @@
 function [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, prevConfig, jointNames)
-nSigns = length(signSeq);
 nJoints = length(jointNames);
 
-% Init qWaypoints
+% Init qWaypoints, tWaypoints
 nWaypoints = 0;
 movingSigns = {'letter_j', 'letter_z'}; 
-%movingSignNWaypoints = [3, 4];
 movingSignTWaypoints = {[0 0.5 1], [0 0.5 1 1.5]};
 for i = 1:length(signSeq)
     idx = find(ismember(movingSigns, signSeq{i}));
     if isempty(idx)
         nWaypoints = nWaypoints + 1;
     else
-        %nWaypoints = nWaypoints + movingSignNWaypoints(idx);
         nWaypoints = nWaypoints + length(movingSignTWaypoints{idx});
     end
 end
@@ -20,28 +17,39 @@ qWaypoints = zeros(nWaypoints + 1, nJoints);
 tWaypoints = zeros(nWaypoints + 1, 1);
 qWaypoints(1, :) = prevConfig; % first config is starting position
 
+% Iterate over sign sequence
 timeBetweenSigns = 1;
 waypointEndIdx = 1;
 for i = 1:length(signSeq)
     sign_name = signSeq{i};
     load(['Configs', filesep, sign_name, '.mat'], 'jointValues');
-    jointDim = find(size(qWaypoints) == length(jointNames));
+    jointDim = find(size(jointValues) == length(jointNames));
     if jointDim ~= 2
         jointValues = jointValues';
     end
     
-    % If jointValues consists of a trajectory of joint values, this extracts
-    % the first set of joint values
+    % Update tWaypoints
     waypointStartIdx = waypointEndIdx  + 1;
     idx = find(ismember(movingSigns, signSeq{i}));
-    if isempty(idx)
+
+    % Not moving sign
+    if isempty(idx) 
         waypointEndIdx = waypointStartIdx;
         tWaypoints(waypointStartIdx:waypointEndIdx) = tWaypoints(waypointStartIdx-1) + timeBetweenSigns;
-    else
+   
+    % Moving sign
+    else 
         waypointEndIdx = waypointStartIdx + length(movingSignTWaypoints{idx}) - 1;
         tWaypoints(waypointStartIdx:waypointEndIdx) = tWaypoints(waypointStartIdx-1) + timeBetweenSigns + movingSignTWaypoints{idx};
     end
 
+    % If repeated letter, slide to right or left depending on hand
+    if i > 1 && strcmp(signSeq{i}, signSeq{i-1})
+        slideJointIdx = ismember(jointNames, 'ARMJ2');
+        jointValues(:, slideJointIdx) = 0.1;
+    end
+
+    % Update qWaypoints
     qWaypoints(waypointStartIdx:waypointEndIdx,:) = jointValues; 
 end
 
