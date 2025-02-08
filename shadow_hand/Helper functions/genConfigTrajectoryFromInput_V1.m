@@ -1,4 +1,4 @@
-function [ds, lastConfig] = genConfigTrajectoryFromInput_OLD(signSeq, prevConfig, jointNames)
+function [ds, lastConfig] = genConfigTrajectoryFromInput_V1(signSeq, prevConfig, jointNames)
 nSigns = length(signSeq);
 nJoints = length(jointNames);
 qWaypoints = zeros(nSigns + 1, nJoints);

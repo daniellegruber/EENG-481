@@ -4,63 +4,55 @@
 
 rbt = shr26df_rbt;
 
-pose_name = 'letter_n';
+pose_name = 'letter_t';
 q0 = homeConfiguration(rbt);
 valuesPrev = zeros(1,nJoints);
 
-% xoffset_from_palm = [0 0 0 0];
-% yoffset_from_knuckle = [0.012, 0.01 0, -0.01];
-% zoffset_from_palm = [0.04, 0.02, 0.02, 0.02];
-xoffset_from_palm = [0 0 0.04 0.04];
-yoffset_from_knuckle = [0.012, 0.01 0, -0.005];
-zoffset_from_palm = [0.04, 0.04, 0.06, 0.06];
+% xoffset_from_palm = [0 0 0 0.04];
+% yoffset_from_knuckle = [0.012, 0.01 0, -0.005];
+% zoffset_from_palm = [0.04, 0.04, 0.04, 0.06];
+% xoffset_from_palm = [0 0 0 0.05];
+% yoffset_from_knuckle = [0.012, 0.01 0, 0.01];
+% zoffset_from_palm = [0.04, 0.04, 0.04, 0.065];
+xoffset_from_palm = [0 0 0 0.046];
+yoffset_from_knuckle = [0.012, 0.01 0, 0.01];
+zoffset_from_palm = [0.04, 0.04, 0.04, 0.06];
 
+%afterAdjustments = {'FFJ4', deg2rad(-20)};
 afterAdjustments = {};
 
-for fingerIdx = [1 2 5 3 4] % do thtip after rftip
+for fingerIdx = [1 2 3 5 4] % do thtip after mftip
 %% Set up target pose of tip
 tip_frame = [lower(fingerNames{fingerIdx}),'tip'];
 tip_to_world = se3(getTransform(rbt,q0,tip_frame,"world"));
 if fingerIdx == 5 % Thumb
-    distanceConstraint = constraintPositionTarget(tip_frame);
-    distanceConstraint.ReferenceBody = 'world';
+    % distanceConstraint = constraintPositionTarget(tip_frame);
+    % distanceConstraint.ReferenceBody = 'world';
 
     % Get transforms of certain frames relative to world in home config
-    rfknuckle_to_world = se3(getTransform(rbt,q0,"rfknuckle","world"));
+    mfknuckle_to_world = se3(getTransform(rbt,q0,"mfknuckle","world"));
 
     % Create target translation
-    trvec_rfknuckle = trvec(rfknuckle_to_world); 
+    trvec_mfknuckle = trvec(mfknuckle_to_world); 
     trvec_tip = trvec(tip_to_world); 
 
-    trvec_target = trvec_rfknuckle;
-    trvec_target(1) = trvec_target(1) + 0.02;
-    %trvec_target(2) = trvec_target(2) + 0.01;
+    trvec_target = trvec_mfknuckle;
+    trvec_target(1) = trvec_target(1) + 0.03;
+    trvec_target(2) = trvec_target(2) + 0.01;
     trvec_target(3) = trvec_target(3) + 0.02;
 
-    distanceConstraint.TargetPosition = trvec_target;
-    distanceConstraint.PositionTolerance = 0;%1e-3;
-    positionOrPose = 0;
+    % distanceConstraint.TargetPosition = trvec_target;
+    % distanceConstraint.PositionTolerance = 0;%1e-3;
+    % positionOrPose = 0;
 
-    % % Get transforms of certain frames relative to world in home config
-    % rfknuckle_to_world = se3(getTransform(rbt,q0,"rfknuckle","world"));
+    T1 = se3(trvec_target, "trvec");
     % 
-    % % Create target translation
-    % trvec_rfknuckle = trvec(rfknuckle_to_world); 
-    % trvec_tip = trvec(tip_to_world); 
-    % 
-    % trvec_target = trvec_rfknuckle;
-    % trvec_target(1) = trvec_target(1) + 0.03;
-    % %trvec_target(2) = trvec_target(2) - 0.02;
-    % trvec_target(3) = trvec_target(3) + 0.02;
-    % 
-    % T1 = se3(trvec_target, "trvec");
-    % 
-    % % Get target rotation
-    % R1 = se3([deg2rad(90), 0, 0],"eul","XYZ"); 
-    % 
-    % % Create target pose
-    % targetPose = T1 * R1;
-    % positionOrPose = 1;
+    % Get target rotation
+    R1 = se3([deg2rad(0), 0, 0],"eul","XYZ"); 
+
+    % Create target pose
+    targetPose = T1 * R1;
+    positionOrPose = 1;
 else 
     distanceConstraint = constraintPositionTarget(tip_frame);
     distanceConstraint.ReferenceBody = 'world';
@@ -104,7 +96,7 @@ if positionOrPose == 1
     % End effector pose contraints
     tip_pos = constraintPoseTarget(tip_frame, 'ReferenceBody', 'world');
     tip_pos.TargetTransform = tform(targetPose);
-    tip_pos.OrientationTolerance = deg2rad(30); % allow more leeway for orientation
+    tip_pos.OrientationTolerance = deg2rad(50); % allow more leeway for orientation
     tip_pos.PositionTolerance = 0;
     tip_pos.Weights = [1, 1]; % PositionTolerance and OrientationTolerance
 end
@@ -118,6 +110,10 @@ lowerBounds = oldBounds(:,1);
 nonFingerIdx = ~startsWith(jointNames,fingerNames{fingerIdx});
 upperBounds(nonFingerIdx) = valuesPrev(nonFingerIdx); 
 lowerBounds(nonFingerIdx) = valuesPrev(nonFingerIdx); 
+if fingerIdx == 4
+    upperBounds(ismember(jointNames,'FFJ4')) = deg2rad(-40);
+    lowerBounds(ismember(jointNames,'FFJ4')) = deg2rad(-40);
+end
 jointLimits.Bounds = [lowerBounds, upperBounds];
 jointLimits.Weights = 20 * ones(1, nJoints);
 
@@ -130,15 +126,6 @@ end
 solJointValues = vertcat(qSol.JointPosition);
 solJointValues(abs(solJointValues) < 1e-3)=0;
 
-% if fingerIdx == 5
-%     if ~isempty(afterAdjustments)
-%         for i = 1:2:length(afterAdjustments)
-%             jointIdx = contains(jointNames, afterAdjustments{i});
-%             jointValue = afterAdjustments{i+1};
-%             solJointValues(jointIdx) = jointValue;
-%         end
-%     end
-% end
 if fingerIdx == 4 
     if ~isempty(afterAdjustments)
         for i = 1:2:length(afterAdjustments)
@@ -181,17 +168,10 @@ rftip_to_world = se3(getTransform(rbt,q0,'rftip',"world"));
 lftip_to_world = se3(getTransform(rbt,q0,'lftip',"world"));
 palm_to_world = se3(getTransform(rbt,homeConfiguration(rbt),'palm',"world"));
 
-disp('thtip offsets:\n')
-thtip_offset = trvec(thtip_to_world) - trvec_rfknuckle;
-disp(thtip_offset)
-%disp(rad2deg(rotm2eul(rotm(thtip_to_world), 'XYZ')))
-
-% disp('rftip offsets:\n')
-% rftip_palm_offset = trvec(rftip_to_world) - trvec(palm_to_world);
-% rftip_base_offset = trvec(rftip_to_world) - trvec(se3(getTransform(rbt,homeConfiguration(rbt),'rfknuckle',"world")));
-% rftip_offset = rftip_palm_offset;
-% rftip_offset(2) = rftip_base_offset(2);
-% disp(rftip_offset)
+% disp('thtip offsets:\n')
+% thtip_offset = trvec(thtip_to_world) - trvec_mfknuckle;
+% disp(thtip_offset)
+% disp(rad2deg(rotm2eul(rotm(thtip_to_world), 'XYZ')))
 
 disp('fftip offsets:\n')
 fftip_palm_offset = trvec(fftip_to_world) - trvec(palm_to_world);
@@ -208,7 +188,7 @@ yoffset_from_knuckle = [0 0 0 0 0.02 0.02];
 zoffset_from_palm = [0, 0 0.12 0.12 0.08 0.09];
 
 for toOverOrUnderIdx = 1:2
-load(['Configs', filesep, 'letter_n.mat'], "jointValues");
+load(['Configs', filesep, 'letter_t.mat'], "jointValues");
 valuesPrev = jointValues;
 q0 = jointValuesToConfigObj(jointValues, jointNames); % Initial config for next iteration
 
@@ -298,11 +278,11 @@ for fingerIdx = [3 4 5]
         if toOverOrUnderIdx == 1
             % For transitions to signs where the thumb is over another
             % finger
-            save(['Configs', filesep, 'letter_n_to_over.mat'], "jointValues");
+            save(['Configs', filesep, 'letter_t_to_over.mat'], "jointValues");
         else
             % For transitions to signs where the thumb is under another
             % finger
-            save(['Configs', filesep, 'letter_n_to_under.mat'], "jointValues");
+            save(['Configs', filesep, 'letter_t_to_under.mat'], "jointValues");
         end
     end
     valuesPrev = solJointValues;
