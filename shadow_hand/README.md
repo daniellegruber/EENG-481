@@ -67,3 +67,13 @@ This folder contains old code and models corresponding to the original 24-joint 
 ## 25df code and models
 
 This folder contains old code and models corresponding to a 25-joint robot that did not have the joint ARMJ2.
+
+# Trajectory generation
+
+The main function used for trajectory generation (generating trajectories for sequences of signs) is `genConfigTrajectoryFromInput.m` in the "Helper functions" folder. The MATLAB `pchip` function is used for interpolation between different signs (sets of joint angles), henceforth referred to as waypoints. As described in the MATLAB documentation, "`p = pchip(x,y,xq)` returns a vector of interpolated values p corresponding to the query points in xq. The values of p are determined by shape-preserving piecewise cubic interpolation of x and y." 
+
+There were four main considerations in designing this function:
+1. When interpolating between two joint angles, use the "shortest-distance angular path."
+2. Signs with movement (e.g., letters j and z) are stored in the "Configs" folder as n x w arrays, where n is the number of joints and w is the number of waypoints. These waypoints should all appear in the overall waypoint array and should correspond to custom time points indicating how fast to proceed through them.  
+3. For letters repeated twice in a row, adjust ARMJ2 of the second sign's waypoint(s) so that interpolation yields a sliding motion.
+4. When simply interpolating between the "official waypoints" for signs, sometimes the trajectories of fingers will interfere with one another. To avoid this, insert special intermediate waypoints to avoid fingers crossing when going from one sign to the next.   
