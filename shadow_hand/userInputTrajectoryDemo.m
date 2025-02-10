@@ -50,3 +50,5 @@ while ~strcmp(letterSeq, 'stop')
     % Get next number sequence
     letterSeq = input('Please enter a sequence of letters to sign:\n', "s");
 end
+
+% NOTE: need to fix p -> i, z -> a
