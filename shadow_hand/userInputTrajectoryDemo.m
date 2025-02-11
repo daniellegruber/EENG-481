@@ -30,14 +30,15 @@ mdl = "User input models/shr26df_user_input.slx";
 %mdl = "User input models/shl26df_user_input.slx";
 
 letterSeq = input('Please enter a sequence of letters to sign:\n', "s");
-prevConfig = zeros(1, nJoints); % start in home config
+prevConfig = 'home';
 while ~strcmp(letterSeq, 'stop')
     % Parse supplied sequence
     letterSeqParsed = strsplit(letterSeq, ' ');
     signSeq = cellfun(@(x) ['letter_', x], letterSeqParsed, 'UniformOutput', false);
+    signSeq = [{prevConfig}, signSeq];
     
     % Generate trajectory between signs
-    [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, prevConfig, jointNames);
+    [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, jointNames);
     
     % Show robotic hand
     supplyInputToUserInputMdlByDs(mdl, ds);
@@ -45,10 +46,10 @@ while ~strcmp(letterSeq, 'stop')
 
     % Set starting config of next trajectory to last config of this
     % trajectory
-    prevConfig = qInterp(:, end);
+    prevConfig = signSeq{end};
 
     % Get next number sequence
     letterSeq = input('Please enter a sequence of letters to sign:\n', "s");
 end
 
-% NOTE: need to fix p -> i, z -> a
+% NOTE: need to fix home -> letter trajectories, add special case for b

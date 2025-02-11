@@ -1,27 +1,10 @@
 function [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, jointNames)
 nJoints = length(jointNames);
 
-% thumbUnderSigns = addLetterPrefix({'m', 'n', 'p', 't'});
-% thumbOverSigns = addLetterPrefix({'a','b', 'h', 'i', 'j', 'k','r','s', 'u', 'v', 'w', 'z'});
-% thumbOverSignUpFingers = {...
-%     {}, ... % a
-%     {'LF', 'RF', 'MF', 'FF'}, ... % b
-%     {'MF', 'FF'}, ... % h
-%     {'LF'}, ... % i
-%     {'LF'}, ... % j
-%     {'MF', 'FF'}, ... % k
-%     {'MF', 'FF'}, ... % r
-%     {}, ... % s
-%     {'MF', 'FF'}, ... % u
-%     {'MF', 'FF'}, ... % v
-%     {'RF', 'MF', 'FF'}, ... % w
-%     {'FF'} ... % z
-%     };
-
-thumbUnderSigns = addLetterPrefix({'b', 'h', 'm', 'n', 'p', 't'});
-thumbOverSigns = addLetterPrefix({'a', 'i', 'j', 'k','r','s', 'u', 'v', 'w', 'z'});
+thumbUnderSigns = addLetterPrefix({'m', 'n', 'p', 't'});
+thumbOverSigns = addLetterPrefix({'b','i', 'j', 'k','r','s', 'u', 'v', 'w', 'z'});
 thumbOverSignUpFingers = {...
-    {}, ... % a
+    {'LF', 'RF', 'MF', 'FF'}, ... % b
     {'LF'}, ... % i
     {'LF'}, ... % j
     {'MF', 'FF'}, ... % k
@@ -99,12 +82,7 @@ for i = 1:length(signSeq)
     %     if eFlag
     %         tPoints = [0, 1, 1.5];
     %     end
-    elseif (underToOverFlag)
-        tPoints = [0, 1, 1.5]; 
-        if eFlag
-            tPoints = [0, 1, 1.5, 2];
-        end
-    elseif (toUnderFlag || overToOverFlag)
+    elseif (underToOverFlag || toUnderFlag || overToOverFlag)
         tPoints = [0, 1]; % intermediate sign lasts for 1s
         if eFlag
             tPoints = [0, 1, 1.5];
@@ -132,7 +110,9 @@ for i = 1:length(signSeq)
     % fingers to move without cross
     if (underToOverFlag || toUnderFlag || overToOverFlag || zFlag || eFlag)
         jointValues2 = jointValues;
-        if underToOverFlag
+        if underToOverFlag || overToOverFlag || zFlag
+            % load(['Configs', filesep, signSeq{i}, '_to_over.mat'], 'jointValues');
+            % jointValues3 = correctJointValueDims(jointValues, nJoints);
             load(['Configs', filesep, signSeq{i}, '_to_under.mat'], 'jointValues');
             jointValues4 = correctJointValueDims(jointValues, nJoints);
             load(['Configs', filesep, signSeq{i}, '_to_over.mat'], 'jointValues');
@@ -142,9 +122,13 @@ for i = 1:length(signSeq)
                 jointValues = correctJointValueDims(jointValues, nJoints);
                 jointValues3 = [jointValues3; jointValues];
             end  
-        elseif overToOverFlag || zFlag
+        if underToOverFlag || overToOverFlag || zFlag
+            % load(['Configs', filesep, signSeq{i}, '_to_over.mat'], 'jointValues');
+            % jointValues3 = correctJointValueDims(jointValues, nJoints);
+            load(['Configs', filesep, signSeq{i}, '_to_under.mat'], 'jointValues');
+            jointValues4 = correctJointValueDims(jointValues, nJoints);
             load(['Configs', filesep, signSeq{i}, '_to_over.mat'], 'jointValues');
-            jointValues3 = correctJointValueDims(jointValues, nJoints);
+            jointValues3 = [jointValues4; correctJointValueDims(jointValues, nJoints)];
             if eFlag
                 load(['Configs', filesep, 'letter_e_intermediate.mat'], 'jointValues');
                 jointValues = correctJointValueDims(jointValues, nJoints);

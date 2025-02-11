@@ -1,17 +1,12 @@
-% thumbOverSigns = addLetterPrefix({'a', 'b', 'h', 'i', 'j', 'k', 'r','s', 'u', 'v', 'w', 'z'});
-% thumbUnderSigns = addLetterPrefix({'m', 'n', 'p', 't'});
-thumbOverSigns = addLetterPrefix({'a', 'i', 'j', 'k', 'r','s', 'u', 'v', 'w', 'z'});
-thumbUnderSigns = addLetterPrefix({'b', 'h', 'm', 'n', 'p', 't'});
-thumbUnderSignLiftedFingers = [3 2 3 2 2 2];
+thumbOverSigns = addLetterPrefix({'b','i', 'j', 'k', 'r','s', 'u', 'v', 'w', 'z'});
+thumbUnderSigns = addLetterPrefix({'m', 'n', 'p', 't'});
+thumbUnderSignLiftedFingers = [3 2 2 2];
 %% Thumb over signs: generate intermediate qWaypoint in which thumb out of way
 % This allow non-interfering transition from letter t -> other signs, i.e.,
 % makes sure paths of fingers don't cross
-% xoffset_from_palm = 0.06;
-% yoffset_from_knuckle = 0.02;
-% zoffset_from_palm = 0.08;
-xoffset_from_palm = 0.07;
+xoffset_from_palm = 0.06;
 yoffset_from_knuckle = 0.02;
-zoffset_from_palm = 0.07;
+zoffset_from_palm = 0.08;
 
 % Get target thtip position
 thumbJointsIdx = startsWith(jointNames,'TH');
@@ -86,12 +81,9 @@ end
 %% Thumb under signs: generate intermediate qWaypoint in which RF, MF, FF lifted 
 % This allow non-interfering transition from letter t -> other signs, i.e.,
 % makes sure paths of fingers don't cross
-% xoffset_from_palm = [0 0.08 0.08 0.08 0.06 0.05];
-% yoffset_from_knuckle = [0 0 0 0 0.02 0.02];
-% zoffset_from_palm = [0 0.12 0.12 0.12 0.08 0.09];
-xoffset_from_palm = [0 0.08 0.08 0.08 0.07 0.05];
+xoffset_from_palm = [0 0.08 0.08 0.08 0.06 0.05];
 yoffset_from_knuckle = [0 0 0 0 0.02 0.02];
-zoffset_from_palm = [0 0.12 0.12 0.12 0.07 0.07];
+zoffset_from_palm = [0 0.12 0.12 0.12 0.08 0.09];
 
 fingersToLift = {[2 3 4 5], [3 4 5]};
 for i = 1:2
@@ -205,7 +197,7 @@ for i = 1:2
             valuesPrev = solJointValues;
             q0 = jointValuesToConfigObj(solJointValues, jointNames); % Initial config for next iteration
         end
-        %supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
+        % supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
     end
 end
 
@@ -359,7 +351,7 @@ mdl = "User input models/shr26df_user_input.slx";
 %mdl = "User input models/shl26df_user_input.slx";
 
 % Show robotic hand
-%supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
+supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
 
 % For debugging
 q0 = jointValuesToConfigObj(jointValues', jointNames);
@@ -376,13 +368,10 @@ disp(thtip_offset)
 %% Letter e: generate intermediate waypoints for transitions to u, v
 % This allow non-interfering transition from letter t -> other signs, i.e.,
 % makes sure paths of fingers don't cross
-% xoffset_from_palm = 0.07;
-% yoffset_from_knuckle = 0.02;
-% zoffset_from_palm = 0.06;
-
-xoffset_from_palm = 0.07;
-yoffset_from_knuckle = 0.01;
-zoffset_from_palm = 0.05;
+xoffset_from_palm = 0.06;
+yoffset_from_knuckle = -0.01;
+% yoffset_from_knuckle = 0;
+zoffset_from_palm = 0.08;
 
 % Get target thtip position
 thumbJointsIdx = startsWith(jointNames,'TH');
@@ -449,34 +438,27 @@ if jointDim ~= 2
 end
 jointValues(end, thumbJointsIdx) = thumbValues;
 jointValues = jointValues(end, :);
-save(['Configs', filesep, sign_name, '_intermediate.mat'], "jointValues");
+save(['Configs', filesep, sign_name, '_interm.mat'], "jointValues");
 
 jointValuesToInputSignals(jointValues', jointNames, 0.001, 2, ...
                     'signals_after_solving_TH');
 mdl = "User input models/shr26df_user_input.slx";
 %mdl = "User input models/shl26df_user_input.slx";
 
-% % Show robotic hand
-% supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
-% 
-% % For debugging
-% q0 = jointValuesToConfigObj(jointValues', jointNames);
-% thtip_to_world = se3(getTransform(rbt,q0,'thtip',"world"));
-% palm_to_world = se3(getTransform(rbt,homeConfiguration(rbt),'palm',"world"));
-% thbase_to_world = se3(getTransform(rbt,homeConfiguration(rbt),'thbase',"world"));
-% 
-% disp('thtip offsets:\n')
-% thtip_offset = trvec(thtip_to_world) - trvec(palm_to_world);
-% thtip_thbase_offset = trvec(thtip_to_world) - trvec(thbase_to_world);
-% thtip_offset(2) = thtip_thbase_offset(2);
-% disp(thtip_offset)
-% 
-% % Generate trajectory between signs
-% signSeq = {'letter_s', 'letter_e_to_intermediate', 'letter_e', 'letter_e_to_intermediate', 'letter_s'};
-% [ds, lastConfig] = genConfigTrajectoryFromInput(signSeq, jointNames);
-% 
-% % Show robotic hand
-% supplyInputToUserInputMdlByDs(mdl, ds);
+% Show robotic hand
+supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
+
+% For debugging
+q0 = jointValuesToConfigObj(jointValues', jointNames);
+thtip_to_world = se3(getTransform(rbt,q0,'thtip',"world"));
+palm_to_world = se3(getTransform(rbt,homeConfiguration(rbt),'palm',"world"));
+thbase_to_world = se3(getTransform(rbt,homeConfiguration(rbt),'thbase',"world"));
+
+disp('thtip offsets:\n')
+thtip_offset = trvec(thtip_to_world) - trvec(palm_to_world);
+thtip_thbase_offset = trvec(thtip_to_world) - trvec(thbase_to_world);
+thtip_offset(2) = thtip_thbase_offset(2);
+disp(thtip_offset)
 %% Helper functions
 function signSeq = addLetterPrefix(letterCell)
     signSeq = cellfun(@(x) ['letter_', x], letterCell, 'UniformOutput', false);
