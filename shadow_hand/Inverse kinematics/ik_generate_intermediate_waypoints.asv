@@ -1,12 +1,25 @@
-thumbOverSigns = addLetterPrefix({'b','i', 'j', 'k', 'r','s', 'u', 'v', 'w', 'z'});
-thumbUnderSigns = addLetterPrefix({'m', 'n', 'p', 't'});
-thumbUnderSignLiftedFingers = [3 2 2 2];
+% thumbOverSigns = addLetterPrefix({'a', 'b', 'h', 'i', 'j', 'k', 'r','s', 'u', 'v', 'w', 'z'});
+% thumbUnderSigns = addLetterPrefix({'m', 'n', 'p', 't'});
+thumbOverSigns = addLetterPrefix({'a', 'i', 'j', 'k', 'r','s', 'u', 'v', 'w', 'z'});
+thumbUnderSigns = addLetterPrefix({'b', 'h', 'm', 'n', 'p', 't'});
+%thumbUnderSignLiftedFingers = [3 2 3 2 2 2];
+thumbUnderSignLiftedFingers = {...
+    {'LF', 'RF', 'MF', 'FF'}, ...
+    {'MF', 'FF'}, ...
+    {'RF', 'MF', 'FF'}, ...
+    {'MF', 'FF'}, ...
+    {'MF', 'FF'}, ...
+    {'MF', 'FF'} ...
+    };
 %% Thumb over signs: generate intermediate qWaypoint in which thumb out of way
 % This allow non-interfering transition from letter t -> other signs, i.e.,
 % makes sure paths of fingers don't cross
-xoffset_from_palm = 0.06;
+% xoffset_from_palm = 0.06;
+% yoffset_from_knuckle = 0.02;
+% zoffset_from_palm = 0.08;
+xoffset_from_palm = 0.07;
 yoffset_from_knuckle = 0.02;
-zoffset_from_palm = 0.08;
+zoffset_from_palm = 0.07;
 
 % Get target thtip position
 thumbJointsIdx = startsWith(jointNames,'TH');
@@ -81,12 +94,15 @@ end
 %% Thumb under signs: generate intermediate qWaypoint in which RF, MF, FF lifted 
 % This allow non-interfering transition from letter t -> other signs, i.e.,
 % makes sure paths of fingers don't cross
-xoffset_from_palm = [0 0.08 0.08 0.08 0.06 0.05];
+% xoffset_from_palm = [0 0.08 0.08 0.08 0.06 0.05];
+% yoffset_from_knuckle = [0 0 0 0 0.02 0.02];
+% zoffset_from_palm = [0 0.12 0.12 0.12 0.08 0.09];
+xoffset_from_palm = [0 0.08 0.08 0.08 0.07 0.05];
 yoffset_from_knuckle = [0 0 0 0 0.02 0.02];
-zoffset_from_palm = [0 0.12 0.12 0.12 0.08 0.09];
+zoffset_from_palm = [0 0.12 0.12 0.12 0.07 0.07];
 
 fingersToLift = {[2 3 4 5], [3 4 5]};
-for i = 1:2
+%for i = 1:2
     for toOverOrUnderIdx = 1:2
         q0 = homeConfiguration(rbt);
         valuesPrev = zeros(1, nJoints);
@@ -177,19 +193,21 @@ for i = 1:2
                 if toOverOrUnderIdx == 1
                     % For transitions to signs where the thumb is over another
                     % finger
-                    if i == 1
-                        save(['Configs', filesep, 'under_to_over_3lifted.mat'], "jointValues");
-                    else
-                        save(['Configs', filesep, 'under_to_over_2lifted.mat'], "jointValues");
-                    end
+                    % if i == 1
+                    %     save(['Configs', filesep, 'under_to_over_3lifted.mat'], "jointValues");
+                    % else
+                    %     save(['Configs', filesep, 'under_to_over_2lifted.mat'], "jointValues");
+                    % end
+                    save(['Configs', filesep, 'under_to_over.mat'], "jointValues");
                 else
                     % For transitions to signs where the thumb is under another
                     % finger
-                    if i == 1
-                        save(['Configs', filesep, 'under_to_under_3lifted.mat'], "jointValues");
-                    else
-                        save(['Configs', filesep, 'under_to_under_2lifted.mat'], "jointValues");
-                    end
+                    % if i == 1
+                    %     save(['Configs', filesep, 'under_to_under_3lifted.mat'], "jointValues");
+                    % else
+                    %     save(['Configs', filesep, 'under_to_under_2lifted.mat'], "jointValues");
+                    % end
+                    save(['Configs', filesep, 'under_to_under.mat'], "jointValues");
                 end
                 jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, ...
                     ['signals_after_solving_', fingerNames{fingerIdx}]);
@@ -197,77 +215,103 @@ for i = 1:2
             valuesPrev = solJointValues;
             q0 = jointValuesToConfigObj(solJointValues, jointNames); % Initial config for next iteration
         end
-        % supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
+        %supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
     end
-end
+%end
+
+load(['Configs', filesep, 'under_to_over.mat'], "jointValues");
+underToOverJointValues = correctJointValueDims(jointValues);
+load(['Configs', filesep, 'under_to_under.mat'], "jointValues");
+underToUnderJointValues = correctJointValueDims(jointValues);
 
 % Iterate over signs
 for i = 1:length(thumbUnderSigns)
     sign_name = thumbUnderSigns{i};
     load(['Configs', filesep, sign_name, '.mat'], "jointValues");
+    originalJointValues = correctJointValueDims(jointValues);
+
+    jointValues = originalJointValues(end,:);
+    for fingerName = thumbUnderSignLiftedFingers{i}
+        fingerJointsIdx = startsWith(jointNames,fingerName);
+        jointValues(fingerJointsIdx) = jointValues(fingerJointsIdx);
+    end
+
+    thumbJointsIdx = startsWith(jointNames,fingerName);
+    underToOverJointValues
+    jointValues
+    save(['Configs', filesep, sign_name, '_to_over.mat'], "jointValues");
+
+    % To under
+    jointValues2 = originalJointValues(end,:);
+    load(['Configs', filesep, 'under_to_under_3lifted.mat'], "jointValues");
     jointDim = find(size(jointValues) == length(jointNames));
     if jointDim ~= 2
         jointValues = jointValues';
     end
-    originalJointValues = jointValues;
-    if thumbUnderSignLiftedFingers(i) == 3
-        % To over
-        jointValues2 = originalJointValues(end,:);
-        load(['Configs', filesep, 'under_to_over_3lifted.mat'], "jointValues");
-        jointDim = find(size(jointValues) == length(jointNames));
-        if jointDim ~= 2
-            jointValues = jointValues';
-        end
-        for fingerIdx = fingersToLift{1}
-            fingerJointsIdx = startsWith(jointNames,fingerNames{fingerIdx});
-            jointValues2(fingerJointsIdx) = jointValues(fingerJointsIdx);
-        end
-        jointValues = jointValues2;
-        save(['Configs', filesep, sign_name, '_to_over.mat'], "jointValues");
-
-        % To under
-        jointValues2 = originalJointValues(end,:);
-        load(['Configs', filesep, 'under_to_under_3lifted.mat'], "jointValues");
-        jointDim = find(size(jointValues) == length(jointNames));
-        if jointDim ~= 2
-            jointValues = jointValues';
-        end
-        for fingerIdx = fingersToLift{1}
-            fingerJointsIdx = startsWith(jointNames,fingerNames{fingerIdx});
-            jointValues2(fingerJointsIdx) = jointValues(fingerJointsIdx);
-        end
-        jointValues = jointValues2;
-        save(['Configs', filesep, sign_name, '_to_under.mat'], "jointValues");
-
-    elseif thumbUnderSignLiftedFingers(i) == 2
-        % To over
-        jointValues2 = originalJointValues(end,:);
-        load(['Configs', filesep, 'under_to_over_2lifted.mat'], "jointValues");
-        jointDim = find(size(jointValues) == length(jointNames));
-        if jointDim ~= 2
-            jointValues = jointValues';
-        end
-        for fingerIdx = fingersToLift{2}
-            fingerJointsIdx = startsWith(jointNames,fingerNames{fingerIdx});
-            jointValues2(fingerJointsIdx) = jointValues(fingerJointsIdx);
-        end
-        jointValues = jointValues2;
-        save(['Configs', filesep, sign_name, '_to_over.mat'], "jointValues");
-
-        % To under
-        jointValues2 = originalJointValues(end,:);
-        load(['Configs', filesep, 'under_to_under_2lifted.mat'], "jointValues");
-        jointDim = find(size(jointValues) == length(jointNames));
-        if jointDim ~= 2
-            jointValues = jointValues';
-        end
-        for fingerIdx = fingersToLift{2}
-            fingerJointsIdx = startsWith(jointNames,fingerNames{fingerIdx});
-            jointValues2(fingerJointsIdx) = jointValues(fingerJointsIdx);
-        end
-        jointValues = jointValues2;
-        save(['Configs', filesep, sign_name, '_to_under.mat'], "jointValues");
+    for fingerIdx = fingersToLift{1}
+        fingerJointsIdx = startsWith(jointNames,fingerNames{fingerIdx});
+        jointValues2(fingerJointsIdx) = jointValues(fingerJointsIdx);
     end
+    jointValues = jointValues2;
+    save(['Configs', filesep, sign_name, '_to_under.mat'], "jointValues");
+    % if thumbUnderSignLiftedFingers(i) == 3
+    %     % To over
+    %     jointValues2 = originalJointValues(end,:);
+    %     load(['Configs', filesep, 'under_to_over_3lifted.mat'], "jointValues");
+    %     jointDim = find(size(jointValues) == length(jointNames));
+    %     if jointDim ~= 2
+    %         jointValues = jointValues';
+    %     end
+    %     for fingerIdx = fingersToLift{1}
+    %         fingerJointsIdx = startsWith(jointNames,fingerNames{fingerIdx});
+    %         jointValues2(fingerJointsIdx) = jointValues(fingerJointsIdx);
+    %     end
+    %     jointValues = jointValues2;
+    %     save(['Configs', filesep, sign_name, '_to_over.mat'], "jointValues");
+    % 
+    %     % To under
+    %     jointValues2 = originalJointValues(end,:);
+    %     load(['Configs', filesep, 'under_to_under_3lifted.mat'], "jointValues");
+    %     jointDim = find(size(jointValues) == length(jointNames));
+    %     if jointDim ~= 2
+    %         jointValues = jointValues';
+    %     end
+    %     for fingerIdx = fingersToLift{1}
+    %         fingerJointsIdx = startsWith(jointNames,fingerNames{fingerIdx});
+    %         jointValues2(fingerJointsIdx) = jointValues(fingerJointsIdx);
+    %     end
+    %     jointValues = jointValues2;
+    %     save(['Configs', filesep, sign_name, '_to_under.mat'], "jointValues");
+    % 
+    % elseif thumbUnderSignLiftedFingers(i) == 2
+    %     % To over
+    %     jointValues2 = originalJointValues(end,:);
+    %     load(['Configs', filesep, 'under_to_over_2lifted.mat'], "jointValues");
+    %     jointDim = find(size(jointValues) == length(jointNames));
+    %     if jointDim ~= 2
+    %         jointValues = jointValues';
+    %     end
+    %     for fingerIdx = fingersToLift{2}
+    %         fingerJointsIdx = startsWith(jointNames,fingerNames{fingerIdx});
+    %         jointValues2(fingerJointsIdx) = jointValues(fingerJointsIdx);
+    %     end
+    %     jointValues = jointValues2;
+    %     save(['Configs', filesep, sign_name, '_to_over.mat'], "jointValues");
+    % 
+    %     % To under
+    %     jointValues2 = originalJointValues(end,:);
+    %     load(['Configs', filesep, 'under_to_under_2lifted.mat'], "jointValues");
+    %     jointDim = find(size(jointValues) == length(jointNames));
+    %     if jointDim ~= 2
+    %         jointValues = jointValues';
+    %     end
+    %     for fingerIdx = fingersToLift{2}
+    %         fingerJointsIdx = startsWith(jointNames,fingerNames{fingerIdx});
+    %         jointValues2(fingerJointsIdx) = jointValues(fingerJointsIdx);
+    %     end
+    %     jointValues = jointValues2;
+    %     save(['Configs', filesep, sign_name, '_to_under.mat'], "jointValues");
+    % end
 end
 
 %% Letter k: generate intermediate waypoints for transitions to u, v
@@ -351,7 +395,7 @@ mdl = "User input models/shr26df_user_input.slx";
 %mdl = "User input models/shl26df_user_input.slx";
 
 % Show robotic hand
-supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
+%supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
 
 % For debugging
 q0 = jointValuesToConfigObj(jointValues', jointNames);
@@ -368,10 +412,13 @@ disp(thtip_offset)
 %% Letter e: generate intermediate waypoints for transitions to u, v
 % This allow non-interfering transition from letter t -> other signs, i.e.,
 % makes sure paths of fingers don't cross
-xoffset_from_palm = 0.06;
-yoffset_from_knuckle = -0.01;
-% yoffset_from_knuckle = 0;
-zoffset_from_palm = 0.08;
+% xoffset_from_palm = 0.07;
+% yoffset_from_knuckle = 0.02;
+% zoffset_from_palm = 0.06;
+
+xoffset_from_palm = 0.07;
+yoffset_from_knuckle = 0.01;
+zoffset_from_palm = 0.05;
 
 % Get target thtip position
 thumbJointsIdx = startsWith(jointNames,'TH');
@@ -438,28 +485,42 @@ if jointDim ~= 2
 end
 jointValues(end, thumbJointsIdx) = thumbValues;
 jointValues = jointValues(end, :);
-save(['Configs', filesep, sign_name, '_interm.mat'], "jointValues");
+save(['Configs', filesep, sign_name, '_intermediate.mat'], "jointValues");
 
 jointValuesToInputSignals(jointValues', jointNames, 0.001, 2, ...
                     'signals_after_solving_TH');
 mdl = "User input models/shr26df_user_input.slx";
 %mdl = "User input models/shl26df_user_input.slx";
 
-% Show robotic hand
-supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
-
-% For debugging
-q0 = jointValuesToConfigObj(jointValues', jointNames);
-thtip_to_world = se3(getTransform(rbt,q0,'thtip',"world"));
-palm_to_world = se3(getTransform(rbt,homeConfiguration(rbt),'palm',"world"));
-thbase_to_world = se3(getTransform(rbt,homeConfiguration(rbt),'thbase',"world"));
-
-disp('thtip offsets:\n')
-thtip_offset = trvec(thtip_to_world) - trvec(palm_to_world);
-thtip_thbase_offset = trvec(thtip_to_world) - trvec(thbase_to_world);
-thtip_offset(2) = thtip_thbase_offset(2);
-disp(thtip_offset)
+% % Show robotic hand
+% supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
+% 
+% % For debugging
+% q0 = jointValuesToConfigObj(jointValues', jointNames);
+% thtip_to_world = se3(getTransform(rbt,q0,'thtip',"world"));
+% palm_to_world = se3(getTransform(rbt,homeConfiguration(rbt),'palm',"world"));
+% thbase_to_world = se3(getTransform(rbt,homeConfiguration(rbt),'thbase',"world"));
+% 
+% disp('thtip offsets:\n')
+% thtip_offset = trvec(thtip_to_world) - trvec(palm_to_world);
+% thtip_thbase_offset = trvec(thtip_to_world) - trvec(thbase_to_world);
+% thtip_offset(2) = thtip_thbase_offset(2);
+% disp(thtip_offset)
+% 
+% % Generate trajectory between signs
+% signSeq = {'letter_s', 'letter_e_to_intermediate', 'letter_e', 'letter_e_to_intermediate', 'letter_s'};
+% [ds, lastConfig] = genConfigTrajectoryFromInput(signSeq, jointNames);
+% 
+% % Show robotic hand
+% supplyInputToUserInputMdlByDs(mdl, ds);
 %% Helper functions
 function signSeq = addLetterPrefix(letterCell)
     signSeq = cellfun(@(x) ['letter_', x], letterCell, 'UniformOutput', false);
+end
+
+function jointValues = correctJointValueDims(jointValues, nJoints)
+    jointDim = find(size(jointValues) == nJoints);
+    if jointDim ~= 2
+        jointValues = jointValues';
+    end
 end
