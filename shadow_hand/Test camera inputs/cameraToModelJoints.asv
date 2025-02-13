@@ -1,0 +1,26 @@
+cameraJointNames = {'T_CMC', 'T_MCP', 'T_SIP'};
+prefixes = {'I', 'M', 'R', 'P'};
+unprefixedJoints = {'MCP', 'PIP', 'DIP'};
+
+for prefix = prefixes
+    cameraJointNames = [cameraJointNames, addPrefix(unprefixedJoints, [prefix{1}, '_'])];
+end
+% modelJointNames = {'THJ1', 'THJ2', 'THJ3', 'FFJ1', 'FFJ2', 'FFJ3', ...
+%     'RFJ1', 'RFJ2', 'RFJ3', 'MFJ1', 'MFJ2', 'MFJ3', 'LFJ1', 'LFJ2', 'LFJ3'};
+modelJointNames = {'THJ1', 'THJ2', 'THJ1', 'FFJ1', 'FFJ2', 'FFJ3', ...
+    'RFJ1', 'RFJ2', 'RFJ3', 'MFJ1', 'MFJ2', 'MFJ3', 'LFJ1', 'LFJ2', 'LFJ3'};
+
+cameraJointValues = deg2rad(180 - [151, 157, 88, 177, 172, 176, 177, 174, 179, 177, 173, 177, 171, 178, 178]);
+modelJointValues = zeros(1, nJoints);
+
+for i = 1:length(cameraJointValues)
+    modelJointName = modelJointNames{i};
+    modelJointValues(startsWith(jointNames,modelJointName)) = cameraJointValues(i);
+end
+
+jointValuesToInputSignals(modelJointValues', jointNames, 0.001, 2, 'camera_input');
+supplyInputToUserInputMdlByMat(mdl, 'Signals/camera_input.mat');
+
+function prefixedCharCell = addPrefix(charCell, prefix)
+    prefixedCharCell = cellfun(@(x) [prefix, x], charCell, 'UniformOutput', false);
+end
