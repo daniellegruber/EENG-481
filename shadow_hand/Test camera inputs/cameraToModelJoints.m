@@ -13,7 +13,7 @@ modelJointNames = {'ZZZ', 'THJ2', 'THJ1', 'FFJ3', 'FFJ2', 'FFJ1', ...
     'MFJ3', 'MFJ2', 'MFJ1', 'RFJ3', 'RFJ2', 'RFJ1', 'LFJ3', 'LFJ2', 'LFJ1'};
 
 %% Load pair
-pairName = 'Pair 3';
+pairName = 'Pair 6';
 csvName = ['Test camera inputs', filesep, 'Test Poses', filesep, pairName, filesep, 'output.csv'];
 cameraJointTbl = readtable(csvName);
 
