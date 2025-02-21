@@ -7,12 +7,16 @@ for i = 1:26
 end
 %% Fill in transitions that need intermediate waypoint
 
+% TO DO: 
+% * make letters c and o more distinct
+
 % Each entry has the name of the intermediate waypoint(s) to insert as well as the
 % proportion of the transition time between the two signs when they should
 % be inserted
 % E.g., when going from a->b, insert the waypoint associated with
 % 'transition_a_to_b.mat' at 0.5 of the total transition time between a and b
 
+% letter a <-> something
 transitionTbl{createIdxFromLetterNames('a', 'b')} = {{'transition_a_to_b'}, 0.5};
 transitionTbl{createIdxFromLetterNames('a', 'c')} = {{'transition_a_to_c'}, 0.4};
 transitionTbl{createIdxFromLetterNames('a', 'd')} = {{'transition_a_to_d'}, 0.3};
@@ -21,13 +25,41 @@ transitionTbl{createIdxFromLetterNames('a', 'h')} = {{'transition_a_to_h'}, 0.8}
 transitionTbl{createIdxFromLetterNames('a', 'k')} = {{'transition_a_to_k'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 'm')} = {{'transition_a_to_m'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 'n')} = {{'transition_a_to_n_1','transition_a_to_n_2'}, [0.4, 0.8]};
+transitionTbl{createIdxFromLetterNames('a', 'p')} = {{'transition_a_to_p'}, 0.5};
+transitionTbl{createIdxFromLetterNames('a', 'r')} = {{'transition_a_to_r'}, 0.3};
+transitionTbl{createIdxFromLetterNames('a', 's')} = {{'transition_a_to_s'}, 0.3};
+transitionTbl{createIdxFromLetterNames('a', 't')} = {{'transition_a_to_t'}, 0.3};
+transitionTbl{createIdxFromLetterNames('a', 'u')} = {{'transition_a_to_u'}, 0.3};
+transitionTbl{createIdxFromLetterNames('a', 'v')} = {{'transition_a_to_u'}, 0.3};
+transitionTbl{createIdxFromLetterNames('a', 'w')} = {{'transition_a_to_w'}, 0.3};
+transitionTbl{createIdxFromLetterNames('a', 'x')} = {{'transition_a_to_x'}, 0.5};
+transitionTbl{createIdxFromLetterNames('a', 'z')} = {{'transition_a_to_z'}, 0.3};
 
-%transitionTbl{createIdxFromLetterNames('m', 'n')} = 'letter_m_to_under';
+% letter b <-> something
+transitionTbl{createIdxFromLetterNames('b', 'e')} = {{'transition_b_to_e'}, 0.8};
+transitionTbl{createIdxFromLetterNames('b', 'i')} = {{'transition_b_to_i'}, 0.5};
+transitionTbl{createIdxFromLetterNames('b', 'r')} = {{'transition_b_to_r'}, 0.8};
+transitionTbl{createIdxFromLetterNames('b', 'u')} = {{'transition_b_to_u'}, 0.8};
+
+% letter c <-> something
+transitionTbl{createIdxFromLetterNames('c', 'e')} = {{'transition_c_to_e'}, 0.5};
+transitionTbl{createIdxFromLetterNames('c', 'n')} = {{'transition_c_to_n'}, 0.7};
+
+% letter d <-> something
+
+% Add reverse transitions for existing entries
+% e.g., if a -> n transition is defined, define n -> a transition using
+% a -> n entry 
+[r, c] = find(~cellfun(@isempty, transitionTbl));
+originalEntries = transitionTbl(sub2ind([26, 26], r,c));
+reverseOrderEntries = cellfun(@(x) {flip(x{1}), 1-flip(x{2})}, originalEntries, 'UniformOutput',false);
+transitionTbl(sub2ind([26, 26], c,r)) = reverseOrderEntries;
+
 
 %% Show trajectory
 %signSeq = {'letter_m', 'letter_n', 'letter_m', 'letter_a', 'letter_b', 'letter_a', 'letter_c', 'letter_j', 'letter_z'};
 % signSeq = addLetterPrefix({'a', 'b', 'a', 'c', 'a', 'd', 'a', 'e', 'a', 'h', 'a', 'm'});
-signSeq = addLetterPrefix({'a', 'h', 'a', 'm', 'a', 'n'});
+signSeq = addLetterPrefix({'c', 'n', 'c'});
 [ds, ~] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl);
     
 % Show robotic hand
