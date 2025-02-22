@@ -26,6 +26,8 @@ addpath("meshes");
 
 addpath("Helper functions");
 
+addpath(genpath("Inverse kinematics"))
+
 %% Joint names
 % Names of joints corresponding to bounds extracted via constraintJointBounds
 % I figured out the matching by comparing the default bounds to those in the urdf file

@@ -9,7 +9,7 @@ qWaypoints = zeros(nMax, nJoints);
 tWaypoints = zeros(nMax, 1);
 
 % Iterate over sign sequence
-timeBetweenSigns = 1.25;
+timeBetweenSigns = 1;
 waypointEndIdx = 0;
 for i = 1:length(signSeq)
     sign_name = signSeq{i};

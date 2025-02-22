@@ -3,12 +3,12 @@ mdl = "User input models/shr26df_user_input.slx";
 rbt = shr26df_rbt;
 
 %% Letter b -> something
-toLetter = 'y';
+toLetter = 's';
 [ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_b', ['letter_', toLetter]}, jointNames);
 %[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_b', 'letter_z_stage_1'}, jointNames);
 supplyInputToUserInputMdlByDs(mdl, ds1);
 %%
-intermediatePointProp = 0.8;
+intermediatePointProp = 0.5;
 intermediatePointIdx = floor(size(qInterp,2) * intermediatePointProp);
 jointValuesIntermediate = qInterp(:,intermediatePointIdx);
 qIntermediate = jointValuesToConfigObj(jointValuesIntermediate, jointNames);
@@ -33,10 +33,15 @@ supplyInputToUserInputMdlByDs(mdl, ds);
 % y_offset = 0.01;
 % z_offset = 0;
 
-% to letter u
-x_offset = 0.01;
-y_offset = 0.01;
+% to letter s
+x_offset = 0.02;
+y_offset = 0.04;
 z_offset = 0;
+
+% to letter u
+% x_offset = 0.01;
+% y_offset = 0.01;
+% z_offset = 0;
 
 fingerIdx = 5;
 tip_frame = [lower(fingerNames{fingerIdx}),'tip'];

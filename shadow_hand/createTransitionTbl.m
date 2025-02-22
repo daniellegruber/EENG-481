@@ -39,6 +39,7 @@ transitionTbl{createIdxFromLetterNames('a', 'z')} = {{'transition_a_to_z'}, 0.3}
 transitionTbl{createIdxFromLetterNames('b', 'e')} = {{'transition_b_to_e'}, 0.8};
 transitionTbl{createIdxFromLetterNames('b', 'i')} = {{'transition_b_to_i'}, 0.5};
 transitionTbl{createIdxFromLetterNames('b', 'r')} = {{'transition_b_to_r'}, 0.8};
+transitionTbl{createIdxFromLetterNames('b', 's')} = {{'transition_b_to_s'}, 0.5};
 transitionTbl{createIdxFromLetterNames('b', 'u')} = {{'transition_b_to_u'}, 0.8};
 
 % letter c <-> something
@@ -46,6 +47,14 @@ transitionTbl{createIdxFromLetterNames('c', 'e')} = {{'transition_c_to_e'}, 0.5}
 transitionTbl{createIdxFromLetterNames('c', 'n')} = {{'transition_c_to_n'}, 0.7};
 
 % letter d <-> something
+transitionTbl{createIdxFromLetterNames('d', 'e')} = {{'transition_d_to_e'}, 0.5};
+transitionTbl{createIdxFromLetterNames('d', 'i')} = {{'transition_d_to_i'}, 0.5};
+transitionTbl{createIdxFromLetterNames('d', 'n')} = {{'transition_d_to_n'}, 0.5};
+transitionTbl{createIdxFromLetterNames('d', 's')} = {{'transition_d_to_s'}, 0.7};
+
+% letter e <-> something
+transitionTbl{createIdxFromLetterNames('e', 'f')} = {{'transition_e_to_f'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 'g')} = {{'transition_e_to_g'}, 0.5};
 
 % Add reverse transitions for existing entries
 % e.g., if a -> n transition is defined, define n -> a transition using
@@ -59,7 +68,7 @@ transitionTbl(sub2ind([26, 26], c,r)) = reverseOrderEntries;
 %% Show trajectory
 %signSeq = {'letter_m', 'letter_n', 'letter_m', 'letter_a', 'letter_b', 'letter_a', 'letter_c', 'letter_j', 'letter_z'};
 % signSeq = addLetterPrefix({'a', 'b', 'a', 'c', 'a', 'd', 'a', 'e', 'a', 'h', 'a', 'm'});
-signSeq = addLetterPrefix({'c', 'n', 'c'});
+signSeq = addLetterPrefix({'e', 'f', 'e', 'g', 'e'});
 [ds, ~] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl);
     
 % Show robotic hand
