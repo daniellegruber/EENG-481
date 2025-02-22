@@ -55,6 +55,24 @@ transitionTbl{createIdxFromLetterNames('d', 's')} = {{'transition_d_to_s'}, 0.7}
 % letter e <-> something
 transitionTbl{createIdxFromLetterNames('e', 'f')} = {{'transition_e_to_f'}, 0.5};
 transitionTbl{createIdxFromLetterNames('e', 'g')} = {{'transition_e_to_g'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 'h')} = {{'transition_e_to_h'}, 0.3}; % still slight interference but okay for now
+transitionTbl{createIdxFromLetterNames('e', 'i')} = {{'transition_e_to_i'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 'j')} = {{'transition_e_to_i'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 'k')} = {{'transition_e_to_k'}, 0.3};
+transitionTbl{createIdxFromLetterNames('e', 'l')} = {{'transition_e_to_l'}, 0.3};
+transitionTbl{createIdxFromLetterNames('e', 'm')} = {{'transition_e_to_m'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 'n')} = {{'transition_e_to_n'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 'o')} = {{'transition_e_to_o'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 'q')} = {{'transition_e_to_q'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 'r')} = {{'transition_e_to_r'}, 0.3};
+transitionTbl{createIdxFromLetterNames('e', 's')} = {{'transition_e_to_s'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 't')} = {{'transition_e_to_t'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 'u')} = {{'transition_e_to_u'}, 0.3};
+transitionTbl{createIdxFromLetterNames('e', 'v')} = {{'transition_e_to_u'}, 0.3};
+transitionTbl{createIdxFromLetterNames('e', 'w')} = {{'transition_e_to_w'}, 0.3};
+transitionTbl{createIdxFromLetterNames('e', 'x')} = {{'transition_e_to_x'}, 0.5};
+transitionTbl{createIdxFromLetterNames('e', 'y')} = {{'transition_e_to_y'}, 0.5};
+
 
 % Add reverse transitions for existing entries
 % e.g., if a -> n transition is defined, define n -> a transition using
@@ -68,7 +86,7 @@ transitionTbl(sub2ind([26, 26], c,r)) = reverseOrderEntries;
 %% Show trajectory
 %signSeq = {'letter_m', 'letter_n', 'letter_m', 'letter_a', 'letter_b', 'letter_a', 'letter_c', 'letter_j', 'letter_z'};
 % signSeq = addLetterPrefix({'a', 'b', 'a', 'c', 'a', 'd', 'a', 'e', 'a', 'h', 'a', 'm'});
-signSeq = addLetterPrefix({'e', 'f', 'e', 'g', 'e'});
+signSeq = addLetterPrefix({'e', 'l', 'e', 'm', 'e', 'n', 'e', 'o', 'e', 'u', 'e', 'v'});
 [ds, ~] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl);
     
 % Show robotic hand
