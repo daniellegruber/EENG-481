@@ -2,13 +2,13 @@
 mdl = "User input models/shr26df_user_input.slx";
 rbt = shr26df_rbt;
 
-%% Letter e -> something
+%% Letter g -> something
 toLetter = 'l';
-[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_e', ['letter_', toLetter]}, jointNames);
-%[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_e', 'letter_z_stage_1'}, jointNames);
+[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_g', ['letter_', toLetter]}, jointNames);
+%[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_g', 'letter_z_stage_1'}, jointNames);
 supplyInputToUserInputMdlByDs(mdl, ds1);
 %%
-intermediatePointProp = 0.3;
+intermediatePointProp = 0.5;
 intermediatePointIdx = floor(size(qInterp,2) * intermediatePointProp);
 jointValuesIntermediate = qInterp(:,intermediatePointIdx);
 qIntermediate = jointValuesToConfigObj(jointValuesIntermediate, jointNames);
@@ -16,37 +16,22 @@ qIntermediate = jointValuesToConfigObj(jointValuesIntermediate, jointNames);
 ds = jointValuesToInputSignals(jointValuesIntermediate, jointNames, 0.001, 2, '');
 supplyInputToUserInputMdlByDs(mdl, ds);
 
-%% Letter e -> something adjustments
+%% Letter g -> something adjustments
 
-% to letter f
-% x_offset = 0.01;
-% y_offset = 0.01;
-% z_offset = -0.02;
-
-% to letter g
-% x_offset = -0.03;
-% y_offset = 0.04;
-% z_offset = -0.02;
-
-% to letter h
+% to letter a
 % x_offset = 0;
-% y_offset = 0.05;
+% y_offset = 0.02;
 % z_offset = -0.01;
 
-% to letter i
-% x_offset = 0.02;
+% to letter h
+% x_offset = -0.03;
 % y_offset = 0.01;
-% z_offset = -0.015;
+% z_offset = 0.01;
 
-% to letter k
-% x_offset = 0.03;
-% y_offset = 0.04;
-% z_offset = -0.02;
-
-% to letter l
-x_offset = 0;
-y_offset = 0.01;
-z_offset = -0.03;
+% to letter i
+x_offset = -0.01;
+y_offset = 0.02;
+z_offset = 0;
 
 
 fingerIdx = 5;
@@ -70,7 +55,7 @@ distanceConstraint.PositionTolerance = 0;%1e-3;
 
 jointValues = runGikSolver(rbt, fingerIdx, ...
     jointValuesIntermediate, distanceConstraint, []);
-save(['Configs', filesep, 'transition_e_to_', toLetter, '.mat'], "jointValues");
+save(['Configs', filesep, 'transition_g_to_', toLetter, '.mat'], "jointValues");
 
 disp('thtip offsets:\n')
 trvec_q0 = trvec(tip_to_world_q0);
@@ -83,15 +68,15 @@ supplyInputToUserInputMdlByDs(mdl, ds);
 
 %% Compare trajectories
 
-[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_e', ['transition_e_to_', toLetter], ['letter_', toLetter]}, jointNames);
+[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_g', ['transition_g_to_', toLetter], ['letter_', toLetter]}, jointNames);
 
 supplyInputToUserInputMdlByDs(mdl, ds2);
 pause(8);
 
-%% Letter d -> something (multiple fingers problematic)
+%% Letter g -> something (multiple fingers problematic)
 
-toLetter = 'm';
-[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_e', ['letter_', toLetter]}, jointNames);
+toLetter = 'n';
+[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_g', ['letter_', toLetter]}, jointNames);
 %supplyInputToUserInputMdlByDs(mdl, ds1);
 
 intermediatePointProp = 0.5;
@@ -103,15 +88,10 @@ ds = jointValuesToInputSignals(jointValuesIntermediate, jointNames, 0.001, 2, ''
 supplyInputToUserInputMdlByDs(mdl, ds);
 %%
 
-% to letter m
-x_offset = [0 0.02 0.02 0.02 -0.01];
-y_offset = [0 0 0 0 0.01];
-z_offset = [0 0 0.02 0.02 0];
-
 % to letter n
-% x_offset = [0 0 0.02 0 -0.01];
-% y_offset = [0 0 0 0 0.01];
-% z_offset = [0 0 0.02 0 0];
+x_offset = [0 0 0.01 0 -0.06];
+y_offset = [0 0 0.03 0 0];
+z_offset = [0 0 0 0 -0.02];
 
 valuesPrev = jointValuesIntermediate;
 for fingerIdx = 1:5
@@ -144,12 +124,12 @@ trvec_qCurr = trvec(se3(getTransform(rbt,qCurr,tip_frame,"world")));
 disp(trvec_qCurr - trvec_q0)
 
 end
-save(['Configs', filesep, 'transition_e_to_', toLetter, '.mat'], "jointValues");
+save(['Configs', filesep, 'transition_g_to_', toLetter, '.mat'], "jointValues");
 ds = jointValuesToInputSignals(jointValues, jointNames, 0.001, 2, '');
 supplyInputToUserInputMdlByDs(mdl, ds);
 
 %%
-[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_e', ['transition_e_to_', toLetter], ['letter_', toLetter]}, jointNames);
+[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_g', ['transition_g_to_', toLetter], ['letter_', toLetter]}, jointNames);
 
 supplyInputToUserInputMdlByDs(mdl, ds2);
 pause(8);
