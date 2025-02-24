@@ -132,7 +132,7 @@ transitionTbl(sub2ind([26, 26], c,r)) = reverseOrderEntries;
 %% Show trajectory
 %signSeq = {'letter_m', 'letter_n', 'letter_m', 'letter_a', 'letter_b', 'letter_a', 'letter_c', 'letter_j', 'letter_z'};
 % signSeq = addLetterPrefix({'a', 'b', 'a', 'c', 'a', 'd', 'a', 'e', 'a', 'h', 'a', 'm'});
-signSeq = addLetterPrefix({'a', 'n', 'a', 'n', 's', 'n', 'x', 'n', 'y', 'n', 'z'});
+signSeq = addLetterPrefix({'a', 'p', 'n', 'p', 'o', 'p'});
 [ds, ~] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl);
     
 % Show robotic hand

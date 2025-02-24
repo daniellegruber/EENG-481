@@ -15,7 +15,7 @@ xoffset_from_palm = [0 0 0.096 0.071];
 yoffset_from_knuckle = [0.012, 0.01 0, 0];
 zoffset_from_palm = [0.04, 0.04, 0.098, 0.16];
 
-afterAdjustments = {'ARMJ1', deg2rad(-90), 'WRJ1', deg2rad(60)};
+afterAdjustments = {'ARMJ1', deg2rad(90), 'WRJ1', deg2rad(60)};
 % afterAdjustments = {};
 
 for fingerIdx = [1 2 3 5 4] % do thtip after mftip
@@ -40,7 +40,6 @@ if fingerIdx == 5 % Thumb
 
     distanceConstraint.TargetPosition = trvec_target;
     distanceConstraint.PositionTolerance = 0;%1e-3;
-    positionOrPose = 0;
 else 
     distanceConstraint = constraintPositionTarget(tip_frame);
     distanceConstraint.ReferenceBody = 'world';
@@ -63,74 +62,28 @@ else
 
     distanceConstraint.TargetPosition = trvec_target;
     distanceConstraint.PositionTolerance = 0;%1e-3;
-    positionOrPose = 0;
 end
 
-%% Create solver
-if positionOrPose==0
-    gik = generalizedInverseKinematics('RigidBodyTree', rbt, ...
-    'ConstraintInputs', {'position','joint'});
-else
-    gik = generalizedInverseKinematics('RigidBodyTree', rbt, ...
-        'ConstraintInputs', {'pose','joint'});
-end
-
-% Solver parameters
-% gik.SolverParameters.MaxIterations = 1500;
-gik.SolverParameters.MaxTime = 2;
-
-
-if positionOrPose == 1
-    % End effector pose contraints
-    tip_pos = constraintPoseTarget(tip_frame, 'ReferenceBody', 'world');
-    tip_pos.TargetTransform = tform(targetPose);
-    tip_pos.OrientationTolerance = deg2rad(30); % allow more leeway for orientation
-    tip_pos.PositionTolerance = 0;
-    tip_pos.Weights = [1, 1]; % PositionTolerance and OrientationTolerance
-end
-
-% Joint constraints -- only want little finger lf to move
-jointLimits = constraintJointBounds(rbt);
-oldBounds = jointLimits.Bounds;
-upperBounds = oldBounds(:,2);
-lowerBounds = oldBounds(:,1);
-% Fix non-finger joints to values obtained from previous iteration
-nonFingerIdx = ~startsWith(jointNames,fingerNames{fingerIdx});
-upperBounds(nonFingerIdx) = valuesPrev(nonFingerIdx); 
-lowerBounds(nonFingerIdx) = valuesPrev(nonFingerIdx); 
-jointLimits.Bounds = [lowerBounds, upperBounds];
-jointLimits.Weights = 20 * ones(1, nJoints);
-
-%% Run solver
-if positionOrPose == 1
-    [qSol, solutionInfo] = gik(q0, tip_pos, jointLimits);
-else
-    [qSol, solutionInfo] = gik(q0, distanceConstraint, jointLimits);
-end
-solJointValues = vertcat(qSol.JointPosition);
-solJointValues(abs(solJointValues) < 1e-3)=0;
+jointValues = runGikSolver(rbt, fingerIdx, ...
+            valuesPrev, distanceConstraint, []);
+valuesPrev = jointValues;
 
 if fingerIdx == 4 
     if ~isempty(afterAdjustments)
         for i = 1:2:length(afterAdjustments)
             jointIdx = contains(jointNames, afterAdjustments{i});
             jointValue = afterAdjustments{i+1};
-            solJointValues(jointIdx) = jointValue;
+            jointValues(jointIdx) = jointValue;
         end
     end
-    jointValues = solJointValues;
-    jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, pose_name);
+    jointValuesToInputSignals(jointValues, jointNames, 0.001, 2, pose_name);
     save(['Configs', filesep, pose_name, '.mat'], "jointValues");
 end
-valuesPrev = solJointValues;
-q0 = jointValuesToConfigObj(solJointValues, jointNames); % Initial config for next iteration
 
-% qSol = gik(q0, lftip_pos, jointLimits);
-% figure;
-% show(shadow_hand_left_rbt,qSol) % for some reason this doesn't show the right joint values
+q0 = jointValuesToConfigObj(jointValues, jointNames); % Initial config for next iteration
 
 %% Create signals to provide to right_test_asl_poses.slx
-jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, ...
+jointValuesToInputSignals(jointValues, jointNames, 0.001, 2, ...
      ['signals_after_solving_', fingerNames{fingerIdx}]);
 
 % jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, ...
