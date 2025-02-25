@@ -25,20 +25,21 @@ while ~strcmp(numberSeq, 'stop')
 end
 
 %% Letter demo
+load(['Trajectory generation', filesep, 'transitionTbl.mat'], "transitionTbl");
 
 mdl = "User input models/shr26df_user_input.slx";
 %mdl = "User input models/shl26df_user_input.slx";
 
 letterSeq = input('Please enter a sequence of letters to sign:\n', "s");
-prevConfig = 'home';
+% prevConfig = 'home';
 while ~strcmp(letterSeq, 'stop')
     % Parse supplied sequence
     letterSeqParsed = strsplit(letterSeq, ' ');
     signSeq = cellfun(@(x) ['letter_', x], letterSeqParsed, 'UniformOutput', false);
-    signSeq = [{prevConfig}, signSeq];
+    % signSeq = [{prevConfig}, signSeq];
     
     % Generate trajectory between signs
-    [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, jointNames);
+    [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl);
     
     % Show robotic hand
     supplyInputToUserInputMdlByDs(mdl, ds);
@@ -46,7 +47,7 @@ while ~strcmp(letterSeq, 'stop')
 
     % Set starting config of next trajectory to last config of this
     % trajectory
-    prevConfig = signSeq{end};
+    % prevConfig = signSeq{end};
 
     % Get next number sequence
     letterSeq = input('Please enter a sequence of letters to sign:\n', "s");

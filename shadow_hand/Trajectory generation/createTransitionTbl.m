@@ -150,6 +150,8 @@ originalEntries = transitionTbl(sub2ind([26, 26], r,c));
 reverseOrderEntries = cellfun(@(x) {flip(x{1}), 1-flip(x{2})}, originalEntries, 'UniformOutput',false);
 transitionTbl(sub2ind([26, 26], c,r)) = reverseOrderEntries;
 
+save(['Trajectory generation', filesep, 'transitionTbl.mat'], "transitionTbl");
+
 
 %% Show trajectory
 %signSeq = {'letter_m', 'letter_n', 'letter_m', 'letter_a', 'letter_b', 'letter_a', 'letter_c', 'letter_j', 'letter_z'};
