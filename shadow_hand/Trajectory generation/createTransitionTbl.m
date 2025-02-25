@@ -1,14 +1,16 @@
 % rows are "from", cols are "to"
-transitionTbl = cell(26); 
-letterNames = cell(1,26);
+transitionTbl = cell(27); 
+letterNames = cell(1,27);
 letterStr = 'a':'z';
 for i = 1:26
     letterNames{i} = letterStr(i);
 end
+letterNames{end} = 'double_z';
 %% Fill in transitions that need intermediate waypoint
 
 % TO DO: 
 % * make letters c and o more distinct
+% * add transitions for letter z -> others
 
 % Each entry has the name of the intermediate waypoint(s) to insert as well as the
 % proportion of the transition time between the two signs when they should
@@ -142,13 +144,22 @@ transitionTbl{createIdxFromLetterNames('u', 'w')} = {{'transition_u_to_w'}, 0.5}
 transitionTbl{createIdxFromLetterNames('u', 'x')} = {{'transition_u_to_x'}, 0.5}; 
 transitionTbl{createIdxFromLetterNames('u', 'z')} = {{'transition_u_to_z'}, 0.5}; 
 
-% Add reverse transitions for existing entries
+% letter z <-> something
+transitionTbl{createIdxFromLetterNames('z', 'a')} = {{'transition_z_to_a'}, 0.5}; 
+
+% letter double z <-> something
+transitionTbl{createIdxFromLetterNames('double_z', 'a')} = {{'transition_double_z_to_a'}, 0.5}; 
+
+% Add reverse transitions for existing entries (expect for z and double z)
 % e.g., if a -> n transition is defined, define n -> a transition using
 % a -> n entry 
 [r, c] = find(~cellfun(@isempty, transitionTbl));
-originalEntries = transitionTbl(sub2ind([26, 26], r,c));
+notFromOrToZIdx = (r < 26 & c < 26);
+r = r(notFromOrToZIdx);
+c = c(notFromOrToZIdx);
+originalEntries = transitionTbl(sub2ind([27, 27], r,c));
 reverseOrderEntries = cellfun(@(x) {flip(x{1}), 1-flip(x{2})}, originalEntries, 'UniformOutput',false);
-transitionTbl(sub2ind([26, 26], c,r)) = reverseOrderEntries;
+transitionTbl(sub2ind([27, 27], c,r)) = reverseOrderEntries;
 
 save(['Trajectory generation', filesep, 'transitionTbl.mat'], "transitionTbl");
 
@@ -164,14 +175,15 @@ supplyInputToUserInputMdlByDs(mdl, ds);
 
 %% Helper functions
 function idx = createIdxFromLetterNames(l1, l2)
-letterNames = cell(1,26);
+letterNames = cell(1,27);
 letterStr = 'a':'z';
 for i = 1:26
     letterNames{i} = letterStr(i);
 end
+letterNames{end} = 'double_z';
 row = find(ismember(letterNames, l1));
 col = find(ismember(letterNames, l2));
-sz = [26, 26];
+sz = [27, 27];
 idx = sub2ind(sz,row,col);
 end
 

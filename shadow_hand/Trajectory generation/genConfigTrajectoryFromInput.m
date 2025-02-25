@@ -1,16 +1,17 @@
 function [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl)
 nJoints = length(jointNames);
 
-letterNames = cell(1,26);
+letterNames = cell(1,27);
 letterStr = 'a':'z';
 for i = 1:26
     letterNames{i} = letterStr(i);
 end
+letterNames{end} = 'double_z';
 letterNames = addLetterPrefix(letterNames);
 
 % Init qWaypoints, tWaypoints
-movingSigns = {'letter_j', 'letter_z'}; 
-movingSignTWaypoints = {[0 0.5 1], [0 0.5 1 1.5]};
+movingSigns = {'letter_j', 'letter_z', 'letter_double_z'}; 
+movingSignTWaypoints = {[0 0.5 1], [0 0.5 1 1.5], [0 0.5 1 1.5]};
 nMax = 100;
 qWaypoints = zeros(nMax, nJoints);
 tWaypoints = zeros(nMax, 1);
@@ -18,83 +19,102 @@ tWaypoints = zeros(nMax, 1);
 % Iterate over sign sequence
 timeBetweenSigns = 1.5;
 timeHoldSign = 0.5;
-%timeToReachTransitionWaypoint = 0.5;
 
 waypointEndIdx = 0;
 tEndOfPrevSign = 0;
 for i = 1:length(signSeq)
-    sign_name = signSeq{i};
-    load(['Configs', filesep, sign_name, '.mat'], 'jointValues');
-    jointValues = correctJointValueDims(jointValues, nJoints);
-    
-    % Update tWaypoints
-    waypointStartIdx = waypointEndIdx  + 1;
-   
-    movingIdx = find(ismember(movingSigns, signSeq{i}));
 
-    transitionFlag = 0;
-    transitionNames = {};
-    transitionProps = 0; % proportion of way between two signs to insert waypoint
-    nTransitionPoints = 0;
-    if i < length(signSeq)
-        transitionTblIdx = [find(ismember(letterNames, signSeq{i})), find(ismember(letterNames, signSeq{i+1}))];
-        if ~isempty(transitionTbl{transitionTblIdx(1), transitionTblIdx(2)})
-            transitionFlag = 1;
-            transitionNames = transitionTbl{transitionTblIdx(1), transitionTblIdx(2)}{1};
-            transitionProps = transitionTbl{transitionTblIdx(1), transitionTblIdx(2)}{2};
-            nTransitionPoints = length(transitionProps);
-        end
+    firstZOfDoubleZFlag = 0;
+    secondZOfDoubleZFlag = 0;
+    if i < length(signSeq) && strcmp(signSeq{i}, 'letter_z') && strcmp(signSeq{i+1}, 'letter_z')
+        firstZOfDoubleZFlag = 1;
+    end
+    if i > 1 && strcmp(signSeq{i}, 'letter_z') && strcmp(signSeq{i-1}, 'letter_z')
+        secondZOfDoubleZFlag = 1;
     end
 
-    % Moving sign
-    if ~isempty(movingIdx) 
-        tPoints = movingSignTWaypoints{movingIdx};
-        tPoints = [tPoints, tPoints(end) + timeHoldSign];
-        tEndOfCurrSign = tEndOfPrevSign + timeBetweenSigns + tPoints(end);
+    if ~secondZOfDoubleZFlag
+        if firstZOfDoubleZFlag
+            sign_name = 'letter_double_z';
+        else
+            sign_name = signSeq{i};
+        end
+        load(['Configs', filesep, sign_name, '.mat'], 'jointValues');
+        jointValues = correctJointValueDims(jointValues, nJoints);
+        
+        % Update tWaypoints
+        waypointStartIdx = waypointEndIdx  + 1;
+       
+        movingIdx = find(ismember(movingSigns, sign_name));
+    
+        transitionFlag = 0;
+        transitionNames = {};
+        transitionProps = 0; % proportion of way between two signs to insert waypoint
+        nTransitionPoints = 0;
+        if i < length(signSeq)
+            if i < (length(signSeq)-1) && firstZOfDoubleZFlag
+                transitionTblIdx = [find(ismember(letterNames, sign_name)), find(ismember(letterNames, signSeq{i+2}))];
+            else
+                transitionTblIdx = [find(ismember(letterNames, sign_name)), find(ismember(letterNames, signSeq{i+1}))];
+            end
+            if ~isempty(transitionTbl{transitionTblIdx(1), transitionTblIdx(2)})
+                transitionFlag = 1;
+                transitionNames = transitionTbl{transitionTblIdx(1), transitionTblIdx(2)}{1};
+                transitionProps = transitionTbl{transitionTblIdx(1), transitionTblIdx(2)}{2};
+                nTransitionPoints = length(transitionProps);
+            end
+        end
+    
+        % Moving sign
+        if ~isempty(movingIdx) 
+            tPoints = movingSignTWaypoints{movingIdx};
+            tPoints = [tPoints, tPoints(end) + timeHoldSign];
+            tEndOfCurrSign = tEndOfPrevSign + timeBetweenSigns + tPoints(end);
+            if transitionFlag
+                %tPoints = [tPoints, tPoints(end) + timeToReachTransitionWaypoint];
+                tPoints = [tPoints, tPoints(end) + transitionProps * timeBetweenSigns];
+            end
+            jointValues = [jointValues; jointValues(end, :)];
+        elseif transitionFlag
+            tEndOfCurrSign = tEndOfPrevSign + timeBetweenSigns + timeHoldSign;
+            %tPoints = [0, timeHoldSign, timeHoldSign + timeToReachTransitionWaypoint];
+            tPoints = [0, timeHoldSign, timeHoldSign + transitionProps * timeBetweenSigns];
+            jointValues = [jointValues; jointValues];
+        else 
+            tEndOfCurrSign = tEndOfPrevSign + timeBetweenSigns + timeHoldSign;
+            tPoints = [0, timeHoldSign];
+            jointValues = [jointValues; jointValues];
+        end
+    
+        waypointEndIdx = waypointStartIdx + length(tPoints) - 1;
+        if i == 1
+            tWaypoints(waypointStartIdx:waypointEndIdx) = tPoints;
+        else
+            tWaypoints(waypointStartIdx:waypointEndIdx) = tEndOfPrevSign + tPoints;
+        end
+    
+        % If repeated letter, slide to right or left depending on hand
+        if i > 1 && ~firstZOfDoubleZFlag && strcmp(signSeq{i}, signSeq{i-1})
+            slideJointIdx = ismember(jointNames, 'ARMJ2');
+            jointValues(:, slideJointIdx) = 0.1;
+        end
+    
+        % If previous letter had thumb inside, insert another waypoint to allow
+        % fingers to move without cross
+        
         if transitionFlag
-            %tPoints = [tPoints, tPoints(end) + timeToReachTransitionWaypoint];
-            tPoints = [tPoints, tPoints(end) + transitionProps * timeBetweenSigns];
+            for j = 1:nTransitionPoints
+            jointValues2 = jointValues;
+            load(['Configs', filesep, transitionNames{j}, '.mat'], 'jointValues');
+            jointValues3 = correctJointValueDims(jointValues, nJoints);
+            jointValues = [jointValues2; jointValues3];
+            end
         end
-        jointValues = [jointValues; jointValues(end, :)];
-    elseif transitionFlag
-        tEndOfCurrSign = tEndOfPrevSign + timeBetweenSigns + timeHoldSign;
-        %tPoints = [0, timeHoldSign, timeHoldSign + timeToReachTransitionWaypoint];
-        tPoints = [0, timeHoldSign, timeHoldSign + transitionProps * timeBetweenSigns];
-        jointValues = [jointValues; jointValues];
-    else 
-        tEndOfCurrSign = tEndOfPrevSign + timeBetweenSigns + timeHoldSign;
-        tPoints = [0, timeHoldSign];
-        jointValues = [jointValues; jointValues];
-    end
-
-    waypointEndIdx = waypointStartIdx + length(tPoints) - 1;
-    if i == 1
-        tWaypoints(waypointStartIdx:waypointEndIdx) = tPoints;
-    else
-        tWaypoints(waypointStartIdx:waypointEndIdx) = tEndOfPrevSign + tPoints;
-    end
-
-    % If repeated letter, slide to right or left depending on hand
-    if i > 1 && strcmp(signSeq{i}, signSeq{i-1})
-        slideJointIdx = ismember(jointNames, 'ARMJ2');
-        jointValues(:, slideJointIdx) = 0.1;
-    end
-
-    % If previous letter had thumb inside, insert another waypoint to allow
-    % fingers to move without cross
     
-    if transitionFlag
-        for j = 1:nTransitionPoints
-        jointValues2 = jointValues;
-        load(['Configs', filesep, transitionNames{j}, '.mat'], 'jointValues');
-        jointValues3 = correctJointValueDims(jointValues, nJoints);
-        jointValues = [jointValues2; jointValues3];
-        end
+        % Update qWaypoints
+        qWaypoints(waypointStartIdx:waypointEndIdx,:) = jointValues; 
+        tEndOfPrevSign = tEndOfCurrSign;
     end
-
-    % Update qWaypoints
-    qWaypoints(waypointStartIdx:waypointEndIdx,:) = jointValues; 
-    tEndOfPrevSign = tEndOfCurrSign;
 end
 
 qWaypoints = qWaypoints(1:waypointEndIdx, :);

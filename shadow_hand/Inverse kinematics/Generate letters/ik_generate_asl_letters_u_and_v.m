@@ -47,7 +47,7 @@ else
     trvec_target(3) = trvec_palm(3) + zoffset_from_palm(fingerIdx);
 end
 
- % Create distance constraint
+% Create distance constraint
 distanceConstraint = constraintPositionTarget(tip_frame);
 distanceConstraint.ReferenceBody = 'world';
 distanceConstraint.TargetPosition = trvec_target;
