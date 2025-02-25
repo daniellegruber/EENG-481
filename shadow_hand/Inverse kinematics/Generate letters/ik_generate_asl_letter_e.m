@@ -2,7 +2,9 @@
 
 % Reminder: se3(trvec(tip_to_world), 'trvec') * se3(rotm(tip_to_world)) == tip_to_world
 
-rbt = shr25df_rbt;
+mdl = "User input models/shr26df_user_input.slx";
+%mdl = "User input models/shl26df_user_input.slx";
+rbt = shr26df_rbt;
 
 pose_name = 'letter_e';
 q0 = homeConfiguration(rbt);
@@ -24,7 +26,6 @@ if fingerIdx == 5 % Thumb
 
     % Create target translation
     trvec_palm = trvec(palm_to_world); 
-    trvec_tip = trvec(tip_to_world); 
 
     trvec_target = trvec_palm;
     trvec_target(1) = trvec_target(1) + 0.03;
@@ -38,11 +39,18 @@ if fingerIdx == 5 % Thumb
 
     % Create target pose
     targetPose = T1 * R1;
-    positionOrPose = 1;
-else
-    distanceConstraint = constraintPositionTarget(tip_frame);
-    distanceConstraint.ReferenceBody = 'world';
+    
+    % Create pose constraint
+    poseConstraint = constraintPoseTarget(tip_frame, 'ReferenceBody', 'world');
+    poseConstraint.TargetTransform = tform(targetPose);
+    poseConstraint.OrientationTolerance = deg2rad(30); % allow more leeway for orientation
+    poseConstraint.PositionTolerance = 0;
+    poseConstraint.Weights = [1, 1]; % PositionTolerance and OrientationTolerance
 
+    % Run solver
+    jointValues = runGikSolver(rbt, fingerIdx, ...
+            valuesPrev, [], poseConstraint);
+else
     knuckle_frame = [lower(fingerNames{fingerIdx}),'knuckle'];
     
     % Get transforms of certain frames relative to world in home config
@@ -51,7 +59,6 @@ else
     
     % Create target translation
     trvec_palm = trvec(palm_to_world); 
-    trvec_tip = trvec(tip_to_world); 
     trvec_knuckle = trvec(knuckle_to_world); 
     
     trvec_target = trvec_palm;
@@ -59,84 +66,32 @@ else
     trvec_target(2) = trvec_knuckle(2)+ yoffset_from_knuckle(fingerIdx);
     trvec_target(3) = trvec_palm(3) + zoffset_from_palm(fingerIdx);
 
+    % Create distance constraint
+    distanceConstraint = constraintPositionTarget(tip_frame);
+    distanceConstraint.ReferenceBody = 'world';
     distanceConstraint.TargetPosition = trvec_target;
     distanceConstraint.PositionTolerance = 0;%1e-3;
-    positionOrPose = 0;
+    
+    % Run solver
+    jointValues = runGikSolver(rbt, fingerIdx, ...
+            valuesPrev, distanceConstraint, []);
 end
 
-%% Create solver
-if positionOrPose==0
-    gik = generalizedInverseKinematics('RigidBodyTree', rbt, ...
-    'ConstraintInputs', {'position','joint'});
-else
-    gik = generalizedInverseKinematics('RigidBodyTree', rbt, ...
-        'ConstraintInputs', {'pose','joint'});
-end
-
-% Solver parameters
-% gik.SolverParameters.MaxIterations = 1500;
-gik.SolverParameters.MaxTime = 2;
-
-
-if positionOrPose == 1
-    % End effector pose contraints
-    tip_pos = constraintPoseTarget(tip_frame, 'ReferenceBody', 'world');
-    tip_pos.TargetTransform = tform(targetPose);
-    tip_pos.OrientationTolerance = deg2rad(30); % allow more leeway for orientation
-    tip_pos.PositionTolerance = 0;
-    tip_pos.Weights = [1, 1]; % PositionTolerance and OrientationTolerance
-end
-
-% Joint constraints -- only want little finger lf to move
-jointLimits = constraintJointBounds(rbt);
-oldBounds = jointLimits.Bounds;
-upperBounds = oldBounds(:,2);
-lowerBounds = oldBounds(:,1);
-% Fix non-finger joints to values obtained from previous iteration
-nonFingerIdx = ~startsWith(jointNames,fingerNames{fingerIdx});
-upperBounds(nonFingerIdx) = valuesPrev(nonFingerIdx); 
-lowerBounds(nonFingerIdx) = valuesPrev(nonFingerIdx); 
-jointLimits.Bounds = [lowerBounds, upperBounds];
-jointLimits.Weights = 20 * ones(1, nJoints);
-
-%% Run solver
-if positionOrPose == 1
-    [qSol, solutionInfo] = gik(q0, tip_pos, jointLimits);
-else
-    [qSol, solutionInfo] = gik(q0, distanceConstraint, jointLimits);
-end
-solJointValues = vertcat(qSol.JointPosition);
-solJointValues(abs(solJointValues) < 1e-3)=0;
+valuesPrev = jointValues;
 
 if fingerIdx == 5
-    if ~isempty(afterAdjustments)
-        for i = 1:2:length(afterAdjustments)
-            jointIdx = contains(jointNames, afterAdjustments{i});
-            jointValue = afterAdjustments{i+1};
-            solJointValues(jointIdx) = jointValue;
-        end
-    end
-    jointValues = solJointValues;
-    jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, pose_name);
+    jointValues = applyAfterAdjustments(jointValues, jointNames, afterAdjustments);
+    jointValuesToInputSignals(jointValues, jointNames, 0.001, 2, pose_name);
     save(['Configs', filesep, pose_name, '.mat'], "jointValues");
 end
-valuesPrev = solJointValues;
-q0 = jointValuesToConfigObj(solJointValues, jointNames); % Initial config for next iteration
 
-% qSol = gik(q0, lftip_pos, jointLimits);
-% figure;
-% show(shadow_hand_left_rbt,qSol) % for some reason this doesn't show the right joint values
+q0 = jointValuesToConfigObj(jointValues, jointNames); % Initial config for next iteration
 
 %% Create signals to provide to right_test_asl_poses.slx
-jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, ...
+jointValuesToInputSignals(jointValues, jointNames, 0.001, 2, ...
      ['signals_after_solving_', fingerNames{fingerIdx}]);
 
-% jointValuesToInputSignals(solJointValues, jointNames, 0.001, 2, ...
-%     ['signals ', char(datetime('now', 'Format', 'd-MMM-y HH-mm-ss'))]);
 end
-
-mdl = "User input models/shr25df_user_input.slx";
-%mdl = "User input models/shl25df_user_input.slx";
 
 % Show robotic hand
 supplyInputToUserInputMdlByMat(mdl, 'Signals/signals_after_solving_TH.mat');
@@ -151,9 +106,7 @@ palm_to_world = se3(getTransform(rbt,q0,'palm',"world"));
 
 disp('thtip offsets:\n')
 thtip_palm_offset = trvec(thtip_to_world) - trvec(palm_to_world);
-%thtip_base_offset = trvec(thtip_to_world) - trvec(se3(getTransform(rbt,q0,'thbase',"world")));
 thtip_offset = thtip_palm_offset;
-%thtip_offset(2) = thtip_base_offset(2);
 disp(thtip_offset)
 disp(rad2deg(rotm2eul(rotm(thtip_to_world), 'XYZ')))
 

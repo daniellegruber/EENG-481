@@ -1,5 +1,5 @@
 function solJointValues = runGikSolver(rbt, fingerIdx, ...
-    valuesPrev, distanceConstraint, targetPose)
+    valuesPrev, distanceConstraint, poseConstraint)
 
 % Setup
 jointNames = {'ARMJ2', 'ARMJ1','WRJ2', 'WRJ1', 'FFJ4', 'FFJ3', 'FFJ2', 'FFJ1', 'LFJ5', 'LFJ4', 'LFJ3', 'LFJ2', 'LFJ1', ...
@@ -31,15 +31,6 @@ end
 % gik.SolverParameters.MaxIterations = 1500;
 gik.SolverParameters.MaxTime = 2;
 
-
-if positionOrPose == 1
-    % End effector pose contraints
-    poseConstraint = constraintPoseTarget(tip_frame, 'ReferenceBody', 'world');
-    poseConstraint.TargetTransform = tform(targetPose);
-    poseConstraint.OrientationTolerance = deg2rad(50); % allow more leeway for orientation
-    poseConstraint.PositionTolerance = 0;
-    poseConstraint.Weights = [1, 1]; % PositionTolerance and OrientationTolerance
-end
 
 % Joint constraints
 jointLimits = constraintJointBounds(rbt);
