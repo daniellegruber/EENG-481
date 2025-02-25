@@ -62,9 +62,9 @@ The code in this folder generates configurations corresponding to ASL signs prog
 
 ## Trajectory generation
 
-# Trajectory generation
-
 The code in this folder helps generate trajectories between configurations, i.e., trajectories for sequences of signs.
+
+# Trajectory generation
 
 The main function used for trajectory generation (generating trajectories for sequences of signs) is `genConfigTrajectoryFromInput.m` in this folder. The MATLAB `pchip` function is used for interpolation between different signs (sets of joint angles), henceforth referred to as waypoints. As described in the MATLAB documentation, "`p = pchip(x,y,xq)` returns a vector of interpolated values p corresponding to the query points in xq. The values of p are determined by shape-preserving piecewise cubic interpolation of x and y." 
 
