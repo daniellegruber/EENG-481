@@ -1,7 +1,6 @@
 function [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl)
 nJoints = length(jointNames);
 
-% Setup info about letter names (corresponding to indices of transitionTbl)
 letterNames = cell(1,27);
 letterStr = 'a':'z';
 for i = 1:26
@@ -10,7 +9,7 @@ end
 letterNames{end} = 'double_z';
 letterNames = addLetterPrefix(letterNames);
 
-% Setup info about moving signs
+% Setup info about moving 
 movingSigns = {'letter_j', 'letter_z', 'letter_double_z'}; 
 movingSignTWaypoints = {[0 0.5 1], [0 0.5 1 1.5], [0 0.5 1 1.5]};
 
