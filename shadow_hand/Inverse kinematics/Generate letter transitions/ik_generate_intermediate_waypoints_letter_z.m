@@ -3,7 +3,7 @@ mdl = "User input models/shr26df_user_input.slx";
 rbt = shr26df_rbt;
 
 %% Letter z -> something
-toLetter = 'a';
+toLetter = 'u';
 [ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_z_stage_4', ['letter_', toLetter]}, jointNames);
 % [ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_z_stage_4', 'letter_z_stage_1'}, jointNames);
 supplyInputToUserInputMdlByDs(mdl, ds1);
@@ -19,6 +19,21 @@ supplyInputToUserInputMdlByDs(mdl, ds);
 %% Letter a -> something adjustments
 
 % to letter a
+% x_offset = 0;
+% y_offset = 0.02;
+% z_offset = 0;
+
+% to letter e
+% x_offset = 0;
+% y_offset = 0;
+% z_offset = -0.02;
+
+% to letter i
+% x_offset = 0;
+% y_offset = 0.03;
+% z_offset = 0;
+
+% to letter u
 x_offset = 0;
 y_offset = 0.02;
 z_offset = 0;

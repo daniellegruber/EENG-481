@@ -8,7 +8,7 @@ toLetter = 'a';
 % [ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_double_z_stage_4', 'letter_z_stage_1'}, jointNames);
 supplyInputToUserInputMdlByDs(mdl, ds1);
 %%
-intermediatePointProp = 0.3;
+intermediatePointProp = 0.5;
 intermediatePointIdx = floor(size(qInterp,2) * intermediatePointProp);
 jointValuesIntermediate = qInterp(:,intermediatePointIdx);
 qIntermediate = jointValuesToConfigObj(jointValuesIntermediate, jointNames);
@@ -16,16 +16,22 @@ qIntermediate = jointValuesToConfigObj(jointValuesIntermediate, jointNames);
 ds = jointValuesToInputSignals(jointValuesIntermediate, jointNames, 0.001, 2, '');
 supplyInputToUserInputMdlByDs(mdl, ds);
 
-%% Letter a -> something adjustments
+%% Letter double z -> something adjustments
 
 % to letter a
-% x_offset = 0.01;
-% y_offset = 0.03;
-% z_offset = 0;
+x_offset = 0;
+y_offset = 0.03;
+z_offset = -0.01;
 
-x_offset = 0.02;
-y_offset = 0;
-z_offset = 0;
+% to letter e
+% x_offset = 0;
+% y_offset = 0.01;
+% z_offset = -0.03;
+
+% to letter i
+% x_offset = 0;
+% y_offset = 0.04;
+% z_offset = 0;
 
 fingerIdx = 5;
 tip_frame = [lower(fingerNames{fingerIdx}),'tip'];
@@ -68,7 +74,7 @@ pause(8);
 
 %% Letter double z -> something (multiple fingers problematic)
 
-toLetter = 'a';
+toLetter = 'i';
 [ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_double_z_stage_4', ['letter_', toLetter]}, jointNames);
 %supplyInputToUserInputMdlByDs(mdl, ds1);
 
@@ -82,9 +88,9 @@ supplyInputToUserInputMdlByDs(mdl, ds);
 %%
 
 % to letter a
-x_offset = [0 0 0.03 0.03 0];
-y_offset = [0 0 0 0 0.015];
-z_offset = [0 0 0.01 0.01 0];
+% x_offset = [0 0 0.03 0.03 0];
+% y_offset = [0 0 0 0 0.015];
+% z_offset = [0 0 0.01 0.01 0];
 
 valuesPrev = jointValuesIntermediate;
 for fingerIdx = 1:5

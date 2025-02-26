@@ -24,7 +24,6 @@ transitionTbl{createIdxFromLetterNames('a', 'c')} = {{'transition_a_to_c'}, 0.4}
 transitionTbl{createIdxFromLetterNames('a', 'd')} = {{'transition_a_to_d'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 'e')} = {{'transition_a_to_e'}, 0.8};
 transitionTbl{createIdxFromLetterNames('a', 'h')} = {{'transition_a_to_h'}, 0.8};
-transitionTbl{createIdxFromLetterNames('a', 'i')} = {{'transition_a_to_i'}, 0.5};
 transitionTbl{createIdxFromLetterNames('a', 'k')} = {{'transition_a_to_k'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 'm')} = {{'transition_a_to_m'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 'n')} = {{'transition_a_to_n_1','transition_a_to_n_2'}, [0.4, 0.8]};
@@ -147,14 +146,10 @@ transitionTbl{createIdxFromLetterNames('u', 'z')} = {{'transition_u_to_z'}, 0.5}
 
 % letter z <-> something
 transitionTbl{createIdxFromLetterNames('z', 'a')} = {{'transition_z_to_a'}, 0.5}; 
-transitionTbl{createIdxFromLetterNames('z', 'e')} = {{'transition_z_to_e'}, 0.5}; 
-transitionTbl{createIdxFromLetterNames('z', 'i')} = {{'transition_z_to_i'}, 0.5}; 
-transitionTbl{createIdxFromLetterNames('z', 'u')} = {{'transition_z_to_u'}, 0.5}; 
+transitionTbl{createIdxFromLetterNames('z', 'a')} = {{'transition_z_to_i'}, 0.5}; 
 
 % letter double z <-> something
 transitionTbl{createIdxFromLetterNames('double_z', 'a')} = {{'transition_double_z_to_a'}, 0.5}; 
-transitionTbl{createIdxFromLetterNames('double_z', 'e')} = {{'transition_double_z_to_e'}, 0.5}; 
-transitionTbl{createIdxFromLetterNames('double_z', 'i')} = {{'transition_double_z_to_i'}, 0.5}; 
 
 % Add reverse transitions for existing entries (expect for z and double z)
 % e.g., if a -> n transition is defined, define n -> a transition using
