@@ -27,11 +27,11 @@ transitionTbl{createIdxFromLetterNames('a', 'h')} = {{'transition_a_to_h'}, 0.8}
 transitionTbl{createIdxFromLetterNames('a', 'i')} = {{'transition_a_to_i'}, 0.5};
 transitionTbl{createIdxFromLetterNames('a', 'k')} = {{'transition_a_to_k'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 'm')} = {{'transition_a_to_m'}, 0.3};
-transitionTbl{createIdxFromLetterNames('a', 'n')} = {{'transition_a_to_n_1','transition_a_to_n_2'}, [0.4, 0.8]};
+transitionTbl{createIdxFromLetterNames('a', 'n')} = {{'transition_a_to_n'}, 0.5};
 transitionTbl{createIdxFromLetterNames('a', 'p')} = {{'transition_a_to_p'}, 0.5};
 transitionTbl{createIdxFromLetterNames('a', 'r')} = {{'transition_a_to_r'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 's')} = {{'transition_a_to_s'}, 0.3};
-transitionTbl{createIdxFromLetterNames('a', 't')} = {{'transition_a_to_t'}, 0.3};
+transitionTbl{createIdxFromLetterNames('a', 't')} = {{'transition_a_to_t'}, 0.5};
 transitionTbl{createIdxFromLetterNames('a', 'u')} = {{'transition_a_to_u'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 'v')} = {{'transition_a_to_u'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 'w')} = {{'transition_a_to_w'}, 0.3};
@@ -145,6 +145,9 @@ transitionTbl{createIdxFromLetterNames('u', 'w')} = {{'transition_u_to_w'}, 0.5}
 transitionTbl{createIdxFromLetterNames('u', 'x')} = {{'transition_u_to_x'}, 0.5}; 
 transitionTbl{createIdxFromLetterNames('u', 'z')} = {{'transition_u_to_z'}, 0.5}; 
 
+% letter y <-> something
+transitionTbl{createIdxFromLetterNames('y', 't')} = {{'transition_y_to_t'}, 0.5}; 
+
 % letter z <-> something
 transitionTbl{createIdxFromLetterNames('z', 'a')} = {{'transition_z_to_a'}, 0.5}; 
 transitionTbl{createIdxFromLetterNames('z', 'e')} = {{'transition_z_to_e'}, 0.5}; 
@@ -168,16 +171,6 @@ reverseOrderEntries = cellfun(@(x) {flip(x{1}), 1-flip(x{2})}, originalEntries, 
 transitionTbl(sub2ind([27, 27], c,r)) = reverseOrderEntries;
 
 save(['Trajectory generation', filesep, 'transitionTbl.mat'], "transitionTbl");
-
-
-%% Show trajectory
-%signSeq = {'letter_m', 'letter_n', 'letter_m', 'letter_a', 'letter_b', 'letter_a', 'letter_c', 'letter_j', 'letter_z'};
-% signSeq = addLetterPrefix({'a', 'b', 'a', 'c', 'a', 'd', 'a', 'e', 'a', 'h', 'a', 'm'});
-signSeq = addLetterPrefix({'s', 'w', 'u', 'x', 'u'});
-[ds, ~] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl);
-    
-% Show robotic hand
-supplyInputToUserInputMdlByDs(mdl, ds);
 
 %% Helper functions
 function idx = createIdxFromLetterNames(l1, l2)

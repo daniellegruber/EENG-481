@@ -102,12 +102,6 @@ for i = 1:length(signSeq)
             tWaypoints(waypointStartIdx:waypointEndIdx) = tEndOfPrevSign + tPoints;
         end
     
-        % If repeated letter, slide to right or left depending on hand
-        if i > 1 && ~firstZOfDoubleZFlag && strcmp(signSeq{i}, signSeq{i-1})
-            slideJointIdx = ismember(jointNames, 'ARMJ2');
-            jointValues(:, slideJointIdx) = 0.1;
-        end
-    
         % If transitionTbl indiates that intermediate waypoint(s) need to be
         % inserted, load these waypoints and insert into qWaypoints
         if transitionFlag
@@ -117,6 +111,12 @@ for i = 1:length(signSeq)
             jointValues3 = correctJointValueDims(jointValues, nJoints);
             jointValues = [jointValues2; jointValues3];
             end
+        end
+
+        % If repeated letter, slide to right or left depending on hand
+        if i > 1 && ~firstZOfDoubleZFlag && strcmp(signSeq{i}, signSeq{i-1})
+            slideJointIdx = ismember(jointNames, 'ARMJ2');
+            jointValues(:, slideJointIdx) = 0.1;
         end
     
         % Update qWaypoints
