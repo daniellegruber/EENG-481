@@ -4,8 +4,8 @@ rbt = shr26df_rbt;
 
 %% Letter double z -> something
 toLetter = 'a';
-[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_double_z_stage_4', ['letter_', toLetter]}, jointNames);
-% [ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_double_z_stage_4', 'letter_z_stage_1'}, jointNames);
+[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvoidance({'letter_double_z_stage_4', ['letter_', toLetter]}, jointNames);
+% [ds1, qInterp] = genConfigTrajectoryNoInterferenceAvoidance({'letter_double_z_stage_4', 'letter_z_stage_1'}, jointNames);
 supplyInputToUserInputMdlByDs(mdl, ds1);
 %%
 intermediatePointProp = 0.5;
@@ -67,7 +67,7 @@ supplyInputToUserInputMdlByDs(mdl, ds);
 
 %% Compare trajectories
 
-[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_double_z_stage_4', ['transition_double_z_to_', toLetter], ['letter_', toLetter]}, jointNames);
+[ds2, ~] = genConfigTrajectoryNoInterferenceAvoidance({'letter_double_z_stage_4', ['transition_double_z_to_', toLetter], ['letter_', toLetter]}, jointNames);
 
 supplyInputToUserInputMdlByDs(mdl, ds2);
 pause(8);
@@ -75,7 +75,7 @@ pause(8);
 %% Letter double z -> something (multiple fingers problematic)
 
 toLetter = 'i';
-[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_double_z_stage_4', ['letter_', toLetter]}, jointNames);
+[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvoidance({'letter_double_z_stage_4', ['letter_', toLetter]}, jointNames);
 %supplyInputToUserInputMdlByDs(mdl, ds1);
 
 intermediatePointProp = 0.5;
@@ -127,7 +127,7 @@ save(['Configs', filesep, 'transition_double_z_to_', toLetter, '.mat'], "jointVa
 ds = jointValuesToInputSignals(jointValues, jointNames, 0.001, 2, '');
 supplyInputToUserInputMdlByDs(mdl, ds);
 %%
-[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_double_z_stage_4', ['transition_double_z_to_', toLetter], ['letter_', toLetter]}, jointNames);
+[ds2, ~] = genConfigTrajectoryNoInterferenceAvoidance({'letter_double_z_stage_4', ['transition_double_z_to_', toLetter], ['letter_', toLetter]}, jointNames);
 
 supplyInputToUserInputMdlByDs(mdl, ds2);
 pause(8);

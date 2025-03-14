@@ -131,7 +131,7 @@ end
 
 %% Generate trajectory between signs
 signSeq = {'letter_z_stage_1', 'letter_z_stage_2', 'letter_z_stage_3', 'letter_z_stage_4'};
-[ds, lastConfig] = genConfigTrajectoryNoInterferenceAvodiance(signSeq, jointNames);
+[ds, lastConfig] = genConfigTrajectoryNoInterferenceAvoidance(signSeq, jointNames);
 
 % Show robotic hand
 supplyInputToUserInputMdlByDs(mdl, ds);

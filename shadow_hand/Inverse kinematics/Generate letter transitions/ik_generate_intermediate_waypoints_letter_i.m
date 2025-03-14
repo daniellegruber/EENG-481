@@ -4,8 +4,8 @@ rbt = shr26df_rbt;
 
 %% Letter i -> something
 toLetter = 'q';
-[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_i', ['letter_', toLetter]}, jointNames);
-% [ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_i', 'letter_z_stage_1'}, jointNames);
+[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvoidance({'letter_i', ['letter_', toLetter]}, jointNames);
+% [ds1, qInterp] = genConfigTrajectoryNoInterferenceAvoidance({'letter_i', 'letter_z_stage_1'}, jointNames);
 supplyInputToUserInputMdlByDs(mdl, ds1);
 %%
 intermediatePointProp = 0.5;
@@ -83,7 +83,7 @@ supplyInputToUserInputMdlByDs(mdl, ds);
 
 %% Compare trajectories
 
-[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_i', ['transition_i_to_', toLetter], ['letter_', toLetter]}, jointNames);
+[ds2, ~] = genConfigTrajectoryNoInterferenceAvoidance({'letter_i', ['transition_i_to_', toLetter], ['letter_', toLetter]}, jointNames);
 
 supplyInputToUserInputMdlByDs(mdl, ds2);
 pause(8);
@@ -91,7 +91,7 @@ pause(8);
 %% Letter i -> something (multiple fingers problematic)
 
 toLetter = 't';
-[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_i', ['letter_', toLetter]}, jointNames);
+[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvoidance({'letter_i', ['letter_', toLetter]}, jointNames);
 %supplyInputToUserInputMdlByDs(mdl, ds1);
 
 intermediatePointProp = 0.5;
@@ -154,7 +154,7 @@ ds = jointValuesToInputSignals(jointValues, jointNames, 0.001, 2, '');
 supplyInputToUserInputMdlByDs(mdl, ds);
 
 %%
-[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_i', ['transition_i_to_', toLetter], ['letter_', toLetter]}, jointNames);
+[ds2, ~] = genConfigTrajectoryNoInterferenceAvoidance({'letter_i', ['transition_i_to_', toLetter], ['letter_', toLetter]}, jointNames);
 
 supplyInputToUserInputMdlByDs(mdl, ds2);
 pause(8);

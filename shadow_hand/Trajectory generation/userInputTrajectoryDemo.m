@@ -9,7 +9,7 @@ while ~strcmp(numberSeq, 'stop')
     signSeq = getNumberSignSeqFromChars(numberSeq);
     
     % Generate trajectory between signs
-    [ds, ~] = genConfigTrajectoryNoInterferenceAvodiance(signSeq, jointNames);
+    [ds, ~] = genConfigTrajectoryNoInterferenceAvoidance(signSeq, jointNames);
     
     % Show robotic hand
     supplyInputToUserInputMdlByDs(mdl, ds);
@@ -43,6 +43,7 @@ while ~strcmp(letterSeq, 'stop')
 end
 
 %% Letter demo: with vs without interferance avoidance
+load(['Trajectory generation', filesep, 'transitionTbl.mat'], "transitionTbl");
 
 mdl = "User input models/shr26df_user_input.slx";
 %mdl = "User input models/shl26df_user_input.slx";
@@ -55,7 +56,7 @@ while ~strcmp(letterSeq, 'stop')
 
     % Generate trajectory between signs without interference avoidance
     disp("Now showing trajectory between signs without interference avoidance")
-    [ds1, ~] = genConfigTrajectoryNoInterferenceAvodiance(signSeq, jointNames);
+    [ds1, ~] = genConfigTrajectoryNoInterferenceAvoidance(signSeq, jointNames);
     
     % Show robotic hand
     supplyInputToUserInputMdlByDs(mdl, ds1);
@@ -85,7 +86,7 @@ while ~strcmp(letterSeq, 'stop')
     signSeq = getLetterSignSeqFromChars(letterSeq);
 
     % Generate trajectory between signs without interference avoidance
-    [ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance(signSeq, jointNames);
+    [ds2, ~] = genConfigTrajectoryNoInterferenceAvoidance(signSeq, jointNames);
     
     % Show robotic hand
     supplyInputToUserInputMdlByDs(mdl, ds2);

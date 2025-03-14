@@ -1,5 +1,5 @@
 %% Letter a -> letter n requires multiple points
-[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_n', 'letter_x'}, jointNames);
+[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvoidance({'letter_n', 'letter_x'}, jointNames);
 %supplyInputToUserInputMdlByDs(mdl, ds1);
 intermediatePointProp = [0.3, 0.5];
 
@@ -49,6 +49,6 @@ for i = 1:length(intermediatePointProp)
     supplyInputToUserInputMdlByDs(mdl, ds);
 end
 % Compare trajectories
-[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_n', 'transition_n_to_x_1','transition_n_to_x_2', 'letter_x'}, jointNames);
+[ds2, ~] = genConfigTrajectoryNoInterferenceAvoidance({'letter_n', 'transition_n_to_x_1','transition_n_to_x_2', 'letter_x'}, jointNames);
 supplyInputToUserInputMdlByDs(mdl, ds2);
 pause(8);

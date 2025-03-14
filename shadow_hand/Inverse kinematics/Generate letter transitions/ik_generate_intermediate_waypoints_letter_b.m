@@ -4,8 +4,8 @@ rbt = shr26df_rbt;
 
 %% Letter b -> something
 toLetter = 's';
-[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_b', ['letter_', toLetter]}, jointNames);
-%[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_b', 'letter_z_stage_1'}, jointNames);
+[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvoidance({'letter_b', ['letter_', toLetter]}, jointNames);
+%[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvoidance({'letter_b', 'letter_z_stage_1'}, jointNames);
 supplyInputToUserInputMdlByDs(mdl, ds1);
 %%
 intermediatePointProp = 0.5;
@@ -77,7 +77,7 @@ supplyInputToUserInputMdlByDs(mdl, ds);
 
 %% Compare trajectories
 
-[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_b', ['transition_b_to_', toLetter], ['letter_', toLetter]}, jointNames);
+[ds2, ~] = genConfigTrajectoryNoInterferenceAvoidance({'letter_b', ['transition_b_to_', toLetter], ['letter_', toLetter]}, jointNames);
 
 supplyInputToUserInputMdlByDs(mdl, ds2);
 pause(8);

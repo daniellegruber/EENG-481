@@ -5,7 +5,7 @@ rbt = shr26df_rbt;
 %% Letter o -> something (multiple fingers problematic)
 
 toLetter = 't';
-[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvodiance({'letter_o', ['letter_', toLetter]}, jointNames);
+[ds1, qInterp] = genConfigTrajectoryNoInterferenceAvoidance({'letter_o', ['letter_', toLetter]}, jointNames);
 %supplyInputToUserInputMdlByDs(mdl, ds1);
 
 intermediatePointProp = 0.5;
@@ -58,7 +58,7 @@ ds = jointValuesToInputSignals(jointValues, jointNames, 0.001, 2, '');
 supplyInputToUserInputMdlByDs(mdl, ds);
 
 %%
-[ds2, ~] = genConfigTrajectoryNoInterferenceAvodiance({'letter_o', ['transition_o_to_', toLetter], ['letter_', toLetter]}, jointNames);
+[ds2, ~] = genConfigTrajectoryNoInterferenceAvoidance({'letter_o', ['transition_o_to_', toLetter], ['letter_', toLetter]}, jointNames);
 
 supplyInputToUserInputMdlByDs(mdl, ds2);
 pause(8);
