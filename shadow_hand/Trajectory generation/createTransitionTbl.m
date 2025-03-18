@@ -25,6 +25,7 @@ transitionTbl{createIdxFromLetterNames('a', 'd')} = {{'transition_a_to_d'}, 0.3}
 transitionTbl{createIdxFromLetterNames('a', 'e')} = {{'transition_a_to_e'}, 0.8};
 transitionTbl{createIdxFromLetterNames('a', 'h')} = {{'transition_a_to_h'}, 0.8};
 transitionTbl{createIdxFromLetterNames('a', 'i')} = {{'transition_a_to_i'}, 0.5};
+transitionTbl{createIdxFromLetterNames('a', 'j')} = {{'transition_a_to_i'}, 0.5};
 transitionTbl{createIdxFromLetterNames('a', 'k')} = {{'transition_a_to_k'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 'm')} = {{'transition_a_to_m'}, 0.3};
 transitionTbl{createIdxFromLetterNames('a', 'n')} = {{'transition_a_to_n'}, 0.5};
@@ -39,7 +40,7 @@ transitionTbl{createIdxFromLetterNames('a', 'x')} = {{'transition_a_to_x'}, 0.5}
 transitionTbl{createIdxFromLetterNames('a', 'z')} = {{'transition_a_to_z'}, 0.3};
 
 % letter b <-> something
-transitionTbl{createIdxFromLetterNames('b', 'e')} = {{'transition_b_to_e'}, 0.8};
+transitionTbl{createIdxFromLetterNames('b', 'e')} = {{'transition_b_to_e'}, 0.5};
 transitionTbl{createIdxFromLetterNames('b', 'i')} = {{'transition_b_to_i'}, 0.5};
 transitionTbl{createIdxFromLetterNames('b', 'r')} = {{'transition_b_to_r'}, 0.8};
 transitionTbl{createIdxFromLetterNames('b', 's')} = {{'transition_b_to_s'}, 0.5};
@@ -159,13 +160,19 @@ transitionTbl{createIdxFromLetterNames('double_z', 'a')} = {{'transition_double_
 transitionTbl{createIdxFromLetterNames('double_z', 'e')} = {{'transition_double_z_to_e'}, 0.5}; 
 transitionTbl{createIdxFromLetterNames('double_z', 'i')} = {{'transition_double_z_to_i'}, 0.5}; 
 
-% Add reverse transitions for existing entries (expect for z and double z)
+% Add reverse transitions for existing entries 
 % e.g., if a -> n transition is defined, define n -> a transition using
 % a -> n entry 
+
+% Exception is for moving signs, i.e., j, z and double z, since going to 
+% one of these letters (e.g., from a -> j_stage1) is different from
+% coming from one of these letters (e.g., from j_stage3 -> a)
+
+movingIdx = find(ismember(letterNames, {'j','z','double_z'}));
 [r, c] = find(~cellfun(@isempty, transitionTbl));
-notFromOrToZIdx = (r < 26 & c < 26);
-r = r(notFromOrToZIdx);
-c = c(notFromOrToZIdx);
+notFromOrToMovingIdx = (~ismember(r,movingIdx)  & ~ismember(c,movingIdx));
+r = r(notFromOrToMovingIdx);
+c = c(notFromOrToMovingIdx);
 originalEntries = transitionTbl(sub2ind([27, 27], r,c));
 reverseOrderEntries = cellfun(@(x) {flip(x{1}), 1-flip(x{2})}, originalEntries, 'UniformOutput',false);
 transitionTbl(sub2ind([27, 27], c,r)) = reverseOrderEntries;

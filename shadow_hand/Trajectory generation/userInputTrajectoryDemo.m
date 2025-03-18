@@ -1,6 +1,3 @@
-mdl = "User input models/shr25df_user_input.slx";
-%mdl = "User input models/shl25df_user_input.slx";
-
 %% Number demo
 numberSeq = input('Please enter a sequence of numbers to sign, separated by spaces:\n', "s");
 
@@ -22,8 +19,11 @@ end
 %% Letter demo
 load(['Trajectory generation', filesep, 'transitionTbl.mat'], "transitionTbl");
 
-mdl = "User input models/shr26df_user_input.slx";
-%mdl = "User input models/shl26df_user_input.slx";
+% mdl = "User input models/shr26df_user_input.slx";
+% leftOrRight = 1;
+
+mdl = "User input models/shl26df_user_input.slx";
+leftOrRight = 0;
 
 letterSeq = input('Please enter a sequence of letters to sign:\n', "s");
 
@@ -32,7 +32,7 @@ while ~strcmp(letterSeq, 'stop')
     signSeq = getLetterSignSeqFromChars(letterSeq);
 
     % Generate trajectory between signs
-    [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl);
+    [ds, qInterp] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl, leftOrRight);
     
     % Show robotic hand
     supplyInputToUserInputMdlByDs(mdl, ds);
@@ -47,6 +47,7 @@ load(['Trajectory generation', filesep, 'transitionTbl.mat'], "transitionTbl");
 
 mdl = "User input models/shr26df_user_input.slx";
 %mdl = "User input models/shl26df_user_input.slx";
+leftOrRight = 1;
 
 letterSeq = input('Please enter a sequence of letters to sign:\n', "s");
 
@@ -64,7 +65,7 @@ while ~strcmp(letterSeq, 'stop')
 
     % Generate trajectory between signs with interference avoidance
     disp("Now showing trajectory between signs with interference avoidance")
-    [ds2, ~] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl);
+    [ds2, ~] = genConfigTrajectoryFromInput(signSeq, jointNames, transitionTbl, leftOrRight);
     
     % Show robotic hand
     supplyInputToUserInputMdlByDs(mdl, ds2);

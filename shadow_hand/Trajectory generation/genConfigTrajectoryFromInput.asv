@@ -119,6 +119,11 @@ for i = 1:length(signSeq)
         if i > 1 && ~firstZOfDoubleZFlag && strcmp(signSeq{i}, signSeq{i-1})
             slideJointIdx = ismember(jointNames, 'ARMJ2');
             jointValues(:, slideJointIdx) = -0.1;
+            % if leftOrRight % right hand
+            %     jointValues(:, slideJointIdx) = -0.1;
+            % else % left hand
+            %     jointValues(:, slideJointIdx) = 0.1;
+            % end
         end
     
         % Update qWaypoints
@@ -133,6 +138,7 @@ tWaypoints = tWaypoints(1:waypointEndIdx, :);
 
 % Modify joint values if left hand
 if ~leftOrRight %left hand
+    %ARMJ1_idx = contains(jointNames, 'ARMJ1');
     leftNegateIdx = contains(jointNames, {'ARMJ1','ARMJ2'});
     qWaypoints(:, leftNegateIdx) = -qWaypoints(:, leftNegateIdx);
 end
