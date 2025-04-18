@@ -4,16 +4,21 @@ import time
 import math
 from openpyxl import load_workbook
 import numpy as np
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 import joblib
+import serial
 
-wb = load_workbook("C:/Users/joela/Downloads/Senior_Project/joint_angle_data.xlsx")
+ # Open the serial connection (adjust the port as needed)
+arduino = serial.Serial('/dev/cu.usbmodem21201', 9600, timeout=1)
+time.sleep(2)  # Give time for Arduino to reset and establish connection
+
+wb = load_workbook("/Users/estebanfigueroa/Documents/EENG-481/joint_angle_data_1-10.xlsx")
 ws = wb.active
 
 # model = load_model("C:/Users/joela/Downloads/Senior_Project/1_2_joint_angle.h5")
 # le = joblib.load("C:/Users/joela/Downloads/Senior_Project/1_2_joint_angle.pkl")
-model = load_model("C:/Users/joela/Downloads/Senior_Project/1_10_joint_angle.h5")
-le = joblib.load("C:/Users/joela/Downloads/Senior_Project/1_10_joint_angle.pkl")
+model = load_model("/Users/estebanfigueroa/Documents/EENG-481/1_10_joint_angle.h5")
+le = joblib.load("/Users/estebanfigueroa/Documents/EENG-481/1_10_joint_angle.pkl")
 
 # Initialize MediaPipe Hands
 mp_hands = mp.solutions.hands
@@ -274,6 +279,10 @@ while True:
         pred_index = np.argmax(pred_prob, axis=1)
         pred_label = le.inverse_transform(pred_index)
         print("Predicted class:", pred_label[0])
+
+        # Convert the prediction to a string and send it
+        pred_label_str = str(pred_label[0])
+        arduino.write((pred_label_str + "\n").encode())
     else:
         # No hand detected: clear the tracker so that when a hand reappears it will be re-selected.
         tracked_hand_center = None

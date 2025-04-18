@@ -10,7 +10,7 @@ hands = mp_hands.Hands(static_image_mode=False,
 mp_drawing = mp.solutions.drawing_utils
 
 # Open USB camera (default ID 0, change if necessary based on where camera is connected)
-camera = cv2.VideoCapture(1)
+camera = cv2.VideoCapture(0)
 
 if not camera.isOpened():
     print("Error: Camera could not be opened.")
