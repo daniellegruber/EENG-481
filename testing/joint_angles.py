@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+import numpy as np
 import time
 import math
 
@@ -42,8 +43,12 @@ def calculate_angle(a, b, c):
 def to_pixel_coords(landmark, width, height):
     return int(landmark.x * width), int(landmark.y * height)
 
+def put_line(img, text, y, font, font_scale=1, thickness=1, x_offset=10, color=(0, 0, 0), line_height=30):
+    cv2.putText(img, text, (x_offset, y), font, font_scale, color, thickness, cv2.LINE_AA)
+    return y + line_height
+
 # Open the camera.
-camera = cv2.VideoCapture(1)
+camera = cv2.VideoCapture(0)
 if not camera.isOpened():
     print("Error: Camera could not be opened.")
     exit()
@@ -208,6 +213,11 @@ while True:
             (landmarks[20].x, landmarks[20].y, landmarks[20].z)
         )
         print(f"DIP: {angle_pinky_dip}")
+        joint_angles = {"Thumb": [angle_thumb_cmc, angle_thumb_mcp, angle_thumb_sip], 
+                        "Index": [angle_index_mcp, angle_index_pip, angle_index_dip], 
+                        "Middle": [angle_middle_mcp, angle_middle_pip, angle_middle_dip], 
+                        "Ring": [angle_ring_mcp, angle_ring_pip, angle_ring_dip], 
+                        "Pinky": [angle_pinky_mcp, angle_pinky_pip, angle_pinky_dip]}
 
         print("<---------- Utility ---------->")
         # Get wrist and thumb tip landmarks
@@ -304,12 +314,23 @@ while True:
                     font, font_scale, (255, 0, 0), thickness, cv2.LINE_AA)
         cv2.putText(frame, f"Z: {relative_z:.3f}", (pt_thumb_tip[0] + 10, pt_thumb_tip[1]),
                     font, font_scale, (255, 0, 0), thickness, cv2.LINE_AA)
-    else:
-        # No hand detected: clear the tracker so that when a hand reappears it will be re-selected.
-        tracked_hand_center = None
+        # Create side panel
+        panel_width = 300
+        panel = 255 * np.ones((h, panel_width, 3), dtype=np.uint8)
+        y_pos = 30
+        y_pos = put_line(panel, "Joint Angles", y_pos, font, color=(0, 0, 255), line_height=50)
 
-    # Show the output frame.
-    cv2.imshow("Hand Detection with Persistent Tracking", frame)
+        for finger, angles in joint_angles.items():
+            y_pos = put_line(panel, f"<{finger}>", y_pos, font)
+            for name, angle in zip(["Joint1", "Joint2", "Joint3"], angles):
+                y_pos = put_line(panel, f"{name}: {angle:.1f} deg", y_pos, font)
+
+        combined = np.hstack((frame, panel))
+        cv2.imshow("Hand Detection with Angles", combined)
+    else:
+        tracked_hand_center = None
+        cv2.imshow("Hand Detection with Angles", frame)
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 

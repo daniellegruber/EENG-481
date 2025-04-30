@@ -280,6 +280,20 @@ while True:
         pred_label = le.inverse_transform(pred_index)
         print("Predicted class:", pred_label[0])
 
+        # Overlay prediction as large text in the top-right corner
+        text = f"{pred_label[0]}"
+        font_big = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale_big = 5.0  # Really large font
+        thickness_big = 10
+        color = (0, 0, 255)  # Red
+
+        # Get text size to right-align
+        (text_width, text_height), _ = cv2.getTextSize(text, font_big, font_scale_big, thickness_big)
+        text_x = frame.shape[1] - text_width - 40  # 40 px padding from right edge
+        text_y = 150  # 100 px from top edge
+
+        cv2.putText(frame, text, (text_x, text_y), font_big, font_scale_big, color, thickness_big, cv2.LINE_AA)
+
         # Convert the prediction to a string and send it
         pred_label_str = str(pred_label[0])
         arduino.write((pred_label_str + "\n").encode())
