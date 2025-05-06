@@ -1,29 +1,29 @@
 %% Number demo
-numberSeq = input('Please enter a sequence of numbers to sign, separated by spaces:\n', "s");
-
-while ~strcmp(numberSeq, 'stop')
-    % Parse supplied sequence
-    signSeq = getNumberSignSeqFromChars(numberSeq);
-    
-    % Generate trajectory between signs
-    [ds, ~] = genConfigTrajectoryNoInterferenceAvoidance(signSeq, jointNames);
-    
-    % Show robotic hand
-    supplyInputToUserInputMdlByDs(mdl, ds);
-    pause(length(signSeq)+1); % wait for Mechanics Explorer to show
-
-    % Get next number sequence
-    numberSeq = input('Please enter a sequence of numbers to sign, separated by spaces:\n', "s");
-end
+% numberSeq = input('Please enter a sequence of numbers to sign, separated by spaces:\n', "s");
+% 
+% while ~strcmp(numberSeq, 'stop')
+%     % Parse supplied sequence
+%     signSeq = getNumberSignSeqFromChars(numberSeq);
+% 
+%     % Generate trajectory between signs
+%     [ds, ~] = genConfigTrajectoryNoInterferenceAvoidance(signSeq, jointNames);
+% 
+%     % Show robotic hand
+%     supplyInputToUserInputMdlByDs(mdl, ds);
+%     pause(length(signSeq)+1); % wait for Mechanics Explorer to show
+% 
+%     % Get next number sequence
+%     numberSeq = input('Please enter a sequence of numbers to sign, separated by spaces:\n', "s");
+% end
 
 %% Letter demo
 load(['Trajectory generation', filesep, 'transitionTbl.mat'], "transitionTbl");
 
-% mdl = "User input models/shr26df_user_input.slx";
-% leftOrRight = 1;
+mdl = "User input models/shr26df_user_input.slx";
+leftOrRight = 1;
 
-mdl = "User input models/shl26df_user_input.slx";
-leftOrRight = 0;
+% mdl = "User input models/shl26df_user_input.slx";
+% leftOrRight = 0;
 
 letterSeq = input('Please enter a sequence of letters to sign:\n', "s");
 
